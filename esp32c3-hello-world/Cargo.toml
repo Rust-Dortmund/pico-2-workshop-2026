@@ -1,0 +1,13 @@
+[package]
+name = "esp32c3-hello-world"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+embassy-executor = { version = "0.7.0", features = ["task-arena-size-20480"] }
+embassy-time = "0.4.0"
+esp-backtrace = { version = "0.16", features = ["exception-handler", "panic-handler", "println", "esp32c3"] }
+esp-bootloader-esp-idf = "0.1"
+esp-hal = { version = "1.0.0-beta.1", features = ["log-04", "esp32c3", "unstable"] }
+esp-hal-embassy = { version = "0.8", features = ["esp32c3"] }
+esp-println = { version = "0.14", features = ["log-04", "esp32c3"] }

@@ -1,0 +1,14 @@
+[workspace]
+resolver = "3"
+members = [
+    "esp32c3-hello-world"
+]
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+opt-level = 3
+lto = 'fat'
+overflow-checks = false
