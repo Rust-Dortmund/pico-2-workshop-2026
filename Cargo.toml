@@ -1,7 +1,8 @@
 [workspace]
 resolver = "3"
 members = [
-    "esp32c3-hello-world"
+    "esp32c3-hello-world",
+    "esp32c3-wifi-ble-controlled-led"
 ]
 
 [profile.release]

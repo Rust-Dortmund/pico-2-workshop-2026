@@ -93,6 +93,13 @@ PROJECTS = {p.name: p for p in [
             # This should usually be enabled but clippy complains as there are no tests.
             check_include_tests=False,
         ),
+        Project(
+            name='esp32c3-wifi-ble-controlled-led',
+            target='riscv32imc-unknown-none-elf',
+            channel='nightly',
+            # This should usually be enabled but clippy complains as there are no tests.
+            check_include_tests=False,
+        ),
     ]
 }
 
