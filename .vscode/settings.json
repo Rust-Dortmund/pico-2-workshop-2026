@@ -1,0 +1,8 @@
+{
+    "rust-analyzer.check.command": "clippy",
+    "rust-analyzer.check.extraArgs": [
+        "--release"
+    ],
+    "rust-analyzer.cargo.target": "riscv32imc-unknown-none-elf",
+    "rust-analyzer.check.allTargets": false,
+}
