@@ -1,17 +1,4 @@
-[target.'cfg(target_arch = "riscv32")']
-rustflags = [
-  "-C", "link-arg=-Tlinkall.x",
-  "-C", "force-frame-pointers",
-]
-
-[env]
-ESP_LOG = "info"
-SSID = "SSID"
-PASSWORD = "PASSWORD"
-STATIC_IP = "1.1.1.1 "
-GATEWAY_IP = "1.1.1.1"
-HOST_IP = "1.1.1.1"
-EMBASSY_EXECUTOR_TASK_ARENA_SIZE="65536"
-
-[unstable]
-build-std = ["alloc", "core"]
+# TODO: From https://github.com/thecodechemist99/pinetime-rust
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# replace nRF52832_xxAA with your chip as listed in `probe-run --list-chips`
+#runner = "probe-run --chip nRF52832_xxAA"

@@ -1,0 +1,65 @@
+[package]
+name = "pinetime-ble-led-controller"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+## TODO: Review these
+
+# Core dependencies
+cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7.3"
+static_cell = "2.0"
+
+# Embassy
+embassy-executor = { version = "0.7.0", features = ["task-arena-size-20480", "defmt", "arch-cortex-m", "executor-thread"] }
+embassy-sync = "0.7"
+embassy-time = { version = "0.4.0", features = ["defmt", "defmt-timestamp-uptime"] }
+embassy-nrf = { version = "0.5", features = ["defmt", "nrf52832", "time-driver-rtc1", "gpiote", "unstable-pac", "time", "nfc-pins-as-gpio"] }
+embedded-hal = "1"
+#embassy-embedded-hal = "0.1"
+
+# IO and Peripherals
+#debouncr = "0.2"
+#embedded-io = "0.6"
+
+# Bluetooth
+# Maybe switch to bleps in the future, but for now just take the easy route
+#nrf-softdevice = { version = "0.1", features = ["ble-peripheral", "ble-gatt-server", "ble-gatt-client", "nrf52832", "s113"] }
+
+# Graphics
+#chrono = { version = "0.4.24", default-features = false }
+#display-interface-spi = "0.4.1"
+#embedded-graphics = "0.8"
+#format_no_std = "1.0.0"
+#mipidsi = "0.7"
+#profont = "0.7"
+
+# Touch control
+#cst816s = { version = "0.1", git = "https://github.com/thecodechemist99/cst816s" }
+
+# Sensors
+#hrs3300 = "0.1"
+#bma42x = { version = "0.0.3" , git = "https://github.com/thecodechemist99/bma423-rs", branch = "bma42x-integration", default-features = false, features = ["accel", "bma421"] }
+
+# Math
+#libm = "0.2"
+#num-complex = { version = "0.4", default-features = false }
+#microfft = { version = "0.5", features = ["size-64"] }
+
+# Debug probe
+defmt = "=1.0.1"
+defmt-rtt = "0.4"
+panic-probe = { version = "0.3", default-features = false, features = ["print-defmt"] }
+
+#[profile.dev]
+#opt-level = "z"
+#strip = false
+#debug = 2
+
+#[profile.release]
+#opt-level = "z"
+#codegen-units = 1
+#lto = true
+#strip = true
+#panic = 'abort'

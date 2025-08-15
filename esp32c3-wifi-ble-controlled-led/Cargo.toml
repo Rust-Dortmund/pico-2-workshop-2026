@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-embassy-executor = { version = "0.7.0", features = ["task-arena-size-20480"] }
+embassy-executor = "0.7.0"
 embassy-futures = "0.1"
 embassy-net = { version = "0.7.0", features = [ "tcp", "udp", "dhcpv4", "medium-ethernet"] }
 embassy-sync = "0.7"
