@@ -57,9 +57,9 @@ panic-probe = { version = "0.3", default-features = false, features = ["print-de
 #strip = false
 #debug = 2
 
-#[profile.release]
-#opt-level = "z"
-#codegen-units = 1
-#lto = true
-#strip = true
-#panic = 'abort'
+[profile.release]
+opt-level = "z"
+codegen-units = 1
+lto = true
+strip = true
+panic = 'abort'

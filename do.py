@@ -81,6 +81,20 @@ class PineTimeFlasher(Flasher):
         )
 
 
+class Rp2350Flasher(Flasher):
+    def flash(self, project: 'Project', runner: CommandRunner) -> int:
+        binary_path = Path("target") / project.target / "release" / project.name
+
+        return runner.run(
+            environment={},
+            command=[
+                'probe-rs', 'run',
+                '--chip', 'RP235x',
+                str(binary_path),
+            ]
+        )
+
+
 @dataclass
 class Project:
     name: str
@@ -205,6 +219,19 @@ PROJECTS = {p.name: p for p in [
             build_args=[],
             flasher=PineTimeFlasher(),
         ),
+        Project(
+            name='rp2350-hello-world',
+            target='thumbv8m.main-none-eabihf',
+            channel='stable',
+            # This should usually be enabled but clippy complains as there are no tests.
+            check_include_tests=False,
+            rustflags=[],
+            environment={
+                'DEFMT_LOG': 'debug',
+            },
+            build_args=[],
+            flasher=Rp2350Flasher(),
+        )
     ]
 }
 
@@ -273,7 +300,7 @@ if __name__ == '__main__':
             print(str(e))
             exit(1)
 
-        working_directory = Path(__file__).resolve().parent
+        working_directory = Path(__file__).resolve().parent / project.name
         runner = CommandRunner(args.verbose, working_directory)
 
         print(f'### Building project {project.name} ###')
