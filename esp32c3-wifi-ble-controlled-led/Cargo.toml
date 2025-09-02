@@ -21,3 +21,12 @@ esp-wifi = { version = "0.14", features = ["log-04", "esp32c3", "wifi", "ble"] }
 picoserve = { version = "0.16", features = ["embassy"] }
 static_cell = "2"
 trouble-host = { version = "0.2", features = ["peripheral", "gatt", "derive"] }
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+opt-level = 3
+lto = 'fat'
+overflow-checks = false
