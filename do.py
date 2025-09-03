@@ -125,8 +125,7 @@ class Project:
         return runner.run(
             environment={},
             command=[
-                'cargo', 'fmt',
-                '--package', self.name,
+                'cargo', 'fmt'
             ],
         )
 
@@ -140,7 +139,6 @@ class Project:
                 *(['--tests'] if self.check_include_tests else []),
                 '--release',
                 f'--target={self.target}',
-                '--package', self.name,
                 *self.build_args,
                 '--',
                 '-Dwarnings'
@@ -156,7 +154,6 @@ class Project:
                 'build',
                 '--release',
                 f'--target={self.target}',
-                '--package', self.name,
                 *self.build_args,
             ]
         )
@@ -221,6 +218,19 @@ PROJECTS = {p.name: p for p in [
         ),
         Project(
             name='rp2350-hello-world',
+            target='thumbv8m.main-none-eabihf',
+            channel='stable',
+            # This should usually be enabled but clippy complains as there are no tests.
+            check_include_tests=False,
+            rustflags=[],
+            environment={
+                'DEFMT_LOG': 'debug',
+            },
+            build_args=[],
+            flasher=Rp2350Flasher(),
+        ),
+        Project(
+            name='rp2350-apds9960-distance-light',
             target='thumbv8m.main-none-eabihf',
             channel='stable',
             # This should usually be enabled but clippy complains as there are no tests.
