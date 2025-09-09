@@ -280,6 +280,19 @@ PROJECTS = {p.name: p for p in [
             },
             build_args=[],
             flasher=Rp2350Flasher(),
+        ),
+        Project(
+            name='rp2350-wifi-ble-controlled-led',
+            target='thumbv8m.main-none-eabihf',
+            channel='nightly',
+            # This should usually be enabled but clippy complains as there are no tests.
+            check_include_tests=False,
+            rustflags=[],
+            environment={
+                'DEFMT_LOG': 'debug',
+            },
+            build_args=['-Z', 'build-std=core'],
+            flasher=Rp2350Flasher(),
         )
     ]
 }
