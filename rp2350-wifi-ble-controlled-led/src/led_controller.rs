@@ -53,6 +53,12 @@ pub(crate) type LedControllerRunner = Runner<
     2,
 >;
 
+/// Initializes the LED controller that drives the LED connected to the given pins.
+///
+/// Returns two things:
+/// 
+/// - A runner that needs to be polled (e.g. given to a task) in order for the LED controller to run.
+/// - A [`Watch`] for passing the color to display to the LED controller.
 pub(crate) fn initialize(
     red_gpio: Peri<'static, PIN_19>,
     green_gpio: Peri<'static, PIN_20>,

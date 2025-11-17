@@ -1,3 +1,5 @@
+//! This module contains the webserver that can be used to control the LED's color.
+
 use defmt::info;
 use embassy_time::Duration;
 use picoserve::{
@@ -9,6 +11,7 @@ use picoserve::{
 
 use crate::{led::Color, led_controller::ColorSender};
 
+/// State of the webserver.
 #[derive(Clone)]
 struct AppState {
     sender: ColorSender<2>,
@@ -20,6 +23,7 @@ impl picoserve::extract::FromRef<AppState> for ColorSender<2> {
     }
 }
 
+/// Defines the routes supported by the webserver by implementing the [`AppWithStateBuilder`] trait.
 struct AppProps;
 
 impl AppWithStateBuilder for AppProps {
@@ -28,11 +32,14 @@ impl AppWithStateBuilder for AppProps {
 
     fn build_app(self) -> picoserve::Router<Self::PathRouter, Self::State> {
         picoserve::Router::new().route(
+            // On POST to `/color/<something>` we expect `something` to parse as a `Color`.
             ("/color", parse_path_segment()),
             post(
                 |color: Color, State(sender): State<ColorSender<2>>| async move {
                     info!("[Webserver] Setting led to {}", color);
+                    // Notify the LED controller of the new color.
                     sender.send(color);
+                    // Return a Json body containing the new color.
                     match color {
                         Color::Red => r#"{"color":"red"}"#,
                         Color::Green => r#"{"color":"green"}"#,
@@ -44,6 +51,7 @@ impl AppWithStateBuilder for AppProps {
     }
 }
 
+/// A runner for driving a webserver connection.
 pub(crate) struct WebserverRunner {
     id: usize,
     stack: embassy_net::Stack<'static>,
@@ -74,6 +82,7 @@ impl WebserverRunner {
     }
 }
 
+/// Factory to create [`WebserverRunner`]s.
 pub(crate) struct WebserverRunnerFactory {
     next_id: usize,
     stack: embassy_net::Stack<'static>,
@@ -96,6 +105,9 @@ impl WebserverRunnerFactory {
     }
 }
 
+/// Initializes the webserver, returning a factory that can be used to create runners for network connections.
+///
+/// The receiver end for `sender` needs to point to the LED controller so POSTing to the webserver changes the LED color.
 pub(crate) fn initialize(
     stack: embassy_net::Stack<'static>,
     sender: ColorSender<2>,
