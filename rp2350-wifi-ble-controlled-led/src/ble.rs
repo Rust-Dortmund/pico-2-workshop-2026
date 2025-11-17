@@ -1,3 +1,5 @@
+//! This module handles BLE connections.
+
 use cyw43::bluetooth::BtDriver;
 use defmt::info;
 use embassy_futures::select::select;
@@ -9,6 +11,7 @@ use crate::{
     mk_static,
 };
 
+// Color codes for the simplistic BLE protocol.
 const COLOR_RED: u8 = 0;
 const COLOR_GREEN: u8 = 1;
 const COLOR_BLUE: u8 = 2;
@@ -23,19 +26,29 @@ impl From<Color> for u8 {
     }
 }
 
+/// GATT server offering a single service: Interacting with the LED color.
 #[gatt_server]
 struct Server {
     led_service: LedService,
 }
 
+/// GATT service providing capabilities to read and set the LED color.
+///
+/// As there is no standard UUID for "tri-color RGB LEDs" defined, we use one without a standard meaning.
 #[gatt_service(uuid = BluetoothUuid16::new(0x180a))]
 struct LedService {
+    /// Characteristic of the GATT service setting the actual color.
+    ///
+    /// Note that we define some descriptor that provide metadata about the characteristic.
+    ///
+    /// Again, there is no standard cahracteristic defined, so we use one without a standard meaning.
     #[descriptor(uuid = descriptors::VALID_RANGE, read, value = [0, 2])]
     #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "color", read, value = "LED Color")]
     #[characteristic(uuid = BluetoothUuid16::new(0x2a57), read, write, notify, value = 0)]
     color: u8,
 }
 
+/// Runner handling the BLE connection.
 pub(crate) struct BleConnectionRunner {
     peripheral: Peripheral<'static, ExternalController<BtDriver<'static>, 10>, DefaultPacketPool>,
     sender: ColorSender<2>,
@@ -45,6 +58,8 @@ pub(crate) struct BleConnectionRunner {
 
 impl BleConnectionRunner {
     /// Create an advertiser to use to connect to a BLE Central, and wait for it to connect.
+    ///
+    /// BLE devices use advertisements to signal their presence to other devices.
     async fn advertise<'values, 'server, C: Controller>(
         name: &'values str,
         peripheral: &mut Peripheral<'values, C, DefaultPacketPool>,
@@ -74,12 +89,17 @@ impl BleConnectionRunner {
         Ok(conn)
     }
 
+    /// Handles read access to a characteristic in a GATT service.
     async fn handle_gatt_read<P: PacketPool>(event: ReadEvent<'_, '_, P>, server: &Server<'_>) {
         if event.handle() == server.led_service.color.handle {
+            // This is for the `color` characteristic.
+
+            // Note that this does nothing but printing the current value! See below for how the value is sent.
             let value = server.get(&server.led_service.color);
             info!("[gatt] Read Event to Color Characteristic: {:?}", value);
         }
 
+        // Accepting and then sending the read event queries the currently cached value and returns it over BLE.
         match event.accept() {
             Ok(reply) => reply.send().await,
             Err(e) => info!("[gatt] error sending response: {:?}", e),
@@ -95,16 +115,26 @@ impl BleConnectionRunner {
         }
     }
 
+    /// Handles write access to a characteristic in a GATT service.
     async fn handle_gatt_write<P: PacketPool>(
         event: WriteEvent<'_, '_, P>,
         server: &Server<'_>,
         sender: &ColorSender<2>,
     ) {
         if event.handle() == server.led_service.color.handle {
+            // This is for the `color` characteristic.
+
             info!(
                 "[gatt] Write Event to Level Characteristic: {:?}",
                 event.data()
             );
+
+            // Decode the payload, notify the LED controller of the new color and respond to the
+            // sender that the request was processed.
+            // Accepting the event will implicitly update the cached value.
+            // Note that sending the color here will implicitly trigger a second notify in [`notify_task`].
+            // We accept this behavior so we don't have to fiddle around with two different
+            // sender / receiver pairs or need a more complicated messaging infrastructure.
             match *event.data() {
                 [COLOR_RED] => {
                     sender.send(Color::Red);
@@ -157,7 +187,12 @@ impl BleConnectionRunner {
     }
 
     /// This task will notify the connected central of changes to characteristics.
-    /// It will stop when the connection is closed by the central or an error occurs.
+    /// 
+    /// In our case there is only the color charcateristic.
+    /// If the color changes then we update the cached value in the BLE server which will trigger a
+    /// notify message to the connected central.
+    ///
+    /// This function stops when the connection is closed by the central or an error occurs.
     async fn notify_task<P: PacketPool>(
         server: &Server<'_>,
         connection: &GattConnection<'_, '_, P>,
@@ -210,12 +245,14 @@ impl BleConnectionRunner {
     }
 }
 
+/// Wrapper struct for all runners needed for BLE.
 pub(crate) struct Ble {
     pub(crate) ble_runner:
         Runner<'static, ExternalController<BtDriver<'static>, 10>, DefaultPacketPool>,
     pub(crate) connection_runner: BleConnectionRunner,
 }
 
+/// Initializes BLE connectivity and returns the runners that need to be polled (e.g. in tasks).
 pub(crate) fn initialize(
     bluetooth_driver: BtDriver<'static>,
     sender: ColorSender<2>,

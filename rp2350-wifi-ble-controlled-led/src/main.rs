@@ -42,6 +42,7 @@ pub static PICOTOOL_ENTRIES: [embassy_rp::binary_info::EntryAddr; 4] = [
     embassy_rp::binary_info::rp_program_build_attribute!(),
 ];
 
+// Load SSID and WiFi password from environment variables at build time.
 const SSID: &str = env!("SSID");
 const PASSWORD: &str = env!("PASSWORD");
 
@@ -49,9 +50,11 @@ const WEB_TASK_POOL_SIZE: usize = 8;
 const NET_STACK_RESOURCES: usize = WEB_TASK_POOL_SIZE + 3;
 
 bind_interrupts!(struct Irqs {
+    // PIO0 is used to emulate the non-standard SPI protocol used by CYW43 (the WiFi / BLE SoC).
     PIO0_IRQ_0 => InterruptHandler<PIO0>;
 });
 
+/// Task driving the CYW43 WiFi / BLE SoC.
 #[embassy_executor::task]
 async fn cyw43_task(
     runner: cyw43::Runner<'static, Output<'static>, PioSpi<'static, PIO0, 0, DMA_CH0>>,
@@ -59,11 +62,13 @@ async fn cyw43_task(
     runner.run().await
 }
 
+/// Task driving the network stack.
 #[embassy_executor::task]
 async fn run_network(mut runner: embassy_net::Runner<'static, NetDriver<'static>>) {
     runner.run().await
 }
 
+/// Runner that prints the IP once a WiFi connection was established.
 pub(crate) struct PrintIpRunner {
     network_stack: embassy_net::Stack<'static>,
 }
@@ -89,21 +94,25 @@ impl PrintIpRunner {
     }
 }
 
+/// Task for [`PrintIpRunner`].
 #[embassy_executor::task]
 async fn run_print_ip(runner: PrintIpRunner) {
     runner.run().await
 }
 
+/// Task driving the LED.
 #[embassy_executor::task]
 async fn run_led_controller(runner: LedControllerRunner) {
     runner.run().await.expect("Infallible");
 }
 
+/// Task running the webserver.
 #[embassy_executor::task(pool_size = WEB_TASK_POOL_SIZE)]
 async fn run_webserver(runner: WebserverRunner) -> ! {
     runner.run().await
 }
 
+/// Task running the BLE stack.
 #[embassy_executor::task]
 async fn run_ble(
     mut runner: BleRunner<'static, ExternalController<BtDriver<'static>, 10>, DefaultPacketPool>,
@@ -111,6 +120,7 @@ async fn run_ble(
     runner.run().await.expect("BLE stack error")
 }
 
+/// Task driving the BLE connections.
 #[embassy_executor::task]
 async fn run_ble_connection(runner: BleConnectionRunner) {
     runner.run().await
@@ -164,6 +174,7 @@ async fn main(spawner: Spawner) {
     )
     .await;
 
+    // The CYW43 must be operable when we create the network stack, so we have to spawn its task before doing so.
     info!("Spawning CYW43 task");
     spawner.must_spawn(cyw43_task(runner));
     info!("Spawned CYW43 task");
@@ -206,6 +217,7 @@ async fn main(spawner: Spawner) {
     spawner.must_spawn(run_network(network_runner));
     spawner.must_spawn(run_print_ip(print_ip_runner));
 
+    // Note that we are running multiple tasks for handling requests to the webserver!
     for _ in 0..WEB_TASK_POOL_SIZE {
         spawner.must_spawn(run_webserver(webserver_task_factory.new_runner()));
     }

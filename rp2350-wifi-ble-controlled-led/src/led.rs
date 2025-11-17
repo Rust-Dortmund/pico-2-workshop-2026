@@ -1,3 +1,5 @@
+//! This module contains abstractions for working with LEDs.
+
 use core::{fmt::Display, marker::PhantomData, str::FromStr};
 
 use defmt::Format;
