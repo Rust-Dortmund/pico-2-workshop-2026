@@ -22,3 +22,7 @@
   ```
 
 - And then REBOOT!
+
+## Building
+
+Make sure to always build and run with `--release`, i.e., `cargo run --release`. 
