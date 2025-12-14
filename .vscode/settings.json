@@ -3,6 +3,6 @@
     "rust-analyzer.check.extraArgs": [
         "--release"
     ],
-    "rust-analyzer.cargo.target": "riscv32imc-unknown-none-elf",
+    "rust-analyzer.cargo.target": "thumbv8m.main-none-eabihf",
     "rust-analyzer.check.allTargets": false,
 }
