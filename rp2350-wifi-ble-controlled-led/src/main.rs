@@ -237,6 +237,6 @@ async fn main(spawner: Spawner) {
     info!("Joined network");
 
     loop {
-        Timer::after(Duration::from_secs(10)).await;
+        Timer::after(Duration::from_secs(5)).await;
     }
 }

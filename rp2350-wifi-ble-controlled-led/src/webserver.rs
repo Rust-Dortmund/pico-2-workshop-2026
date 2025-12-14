@@ -62,23 +62,16 @@ pub(crate) struct WebserverRunner {
 
 impl WebserverRunner {
     pub(crate) async fn run(self) -> ! {
-        let port = 80;
+        const PORT: u16 = 80;
         let mut tcp_rx_buffer = [0; 1024];
         let mut tcp_tx_buffer = [0; 1024];
         let mut http_buffer = [0; 2048];
 
-        picoserve::listen_and_serve_with_state(
-            self.id,
-            self.app,
-            self.config,
-            self.stack,
-            port,
-            &mut tcp_rx_buffer,
-            &mut tcp_tx_buffer,
-            &mut http_buffer,
-            &self.state,
-        )
-        .await
+        let app = self.app.shared().with_state(self.state);
+        let server = picoserve::Server::new(&app, self.config, &mut http_buffer);
+        match server.listen_and_serve(self.id, self.stack, PORT, &mut tcp_rx_buffer, &mut tcp_tx_buffer).await {
+            // This can only happen if the server is set up `with_graceful_shutdown`, which we don't use.
+        }
     }
 }
 
@@ -112,6 +105,7 @@ pub(crate) fn initialize(
     stack: embassy_net::Stack<'static>,
     sender: ColorSender<2>,
 ) -> WebserverRunnerFactory {
+    let state = AppState {sender};
     let app = make_static!(AppRouter<AppProps>, AppProps.build_app());
 
     let config = make_static!(
@@ -130,6 +124,6 @@ pub(crate) fn initialize(
         stack,
         app,
         config,
-        state: AppState { sender },
+        state,
     }
 }
