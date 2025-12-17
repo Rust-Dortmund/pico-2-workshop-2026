@@ -1,17 +1,18 @@
 #![no_std]
 #![no_main]
 
-use apds9960::Apds9960Async;
 use defmt::*;
 use embassy_executor::Spawner;
 use embassy_futures::select::{Either, select};
 use embassy_rp::{
     Peripherals,
     gpio::{Input, Level, Output, Pull},
-    i2c::InterruptHandler,
+    i2c::InterruptHandler, peripherals::I2C1,
 };
 use embassy_time::Timer;
 use {defmt_rtt as _, panic_probe as _};
+
+type Apds9960 = apds9960::Apds9960<embassy_rp::i2c::I2c<'static, I2C1, embassy_rp::i2c::Async>, apds9960::Async>;
 
 // Program metadata for `picotool info`.
 // This isn't needed, but it's recomended to have these minimal entries.
@@ -79,14 +80,14 @@ impl LampState {
     }
 }
 
-struct GestureDetector<'input, I2C> {
-    sensor: Apds9960Async<I2C>,
+struct GestureDetector<'input> {
+    sensor: Apds9960,
     interrupt: Input<'input>,
     gesture_data: [u8; 4 * (u8::MAX as usize + 1)],
 }
 
-impl<'input, I2C> GestureDetector<'input, I2C> {
-    fn new(sensor: Apds9960Async<I2C>, interrupt: Input<'input>) -> Self {
+impl<'input> GestureDetector<'input> {
+    fn new(sensor: Apds9960, interrupt: Input<'input>) -> Self {
         Self {
             sensor,
             interrupt,
@@ -95,7 +96,7 @@ impl<'input, I2C> GestureDetector<'input, I2C> {
     }
 }
 
-impl<I2C: embedded_hal_async::i2c::I2c> GestureDetector<'_, I2C> {
+impl GestureDetector<'_> {
     async fn any_gesture_detected(&mut self) -> bool {
         let available_gestures = usize::from(self.sensor.read_gesture_data_level().await.unwrap());
         if available_gestures == 0 {
@@ -151,7 +152,7 @@ async fn main(_spawner: Spawner) {
     let scl = PIN_15;
     let config = embassy_rp::i2c::Config::default();
     let bus = embassy_rp::i2c::I2c::new_async(I2C1, scl, sda, Irqs, config);
-    let mut sensor = Apds9960Async::new(bus);
+    let mut sensor = Apds9960::new(bus);
 
     let sensor_interrupt = Input::new(PIN_13, Pull::None);
 
