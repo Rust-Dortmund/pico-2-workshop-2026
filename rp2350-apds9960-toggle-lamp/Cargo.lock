@@ -14,7 +14,7 @@ dependencies = [
 [[package]]
 name = "apds9960"
 version = "0.2.0"
-source = "git+https://github.com/BjoernLange/apds9960-rs#33da4b56ef070cfaa23a27ab5bb7f7670ef256c8"
+source = "git+https://github.com/BjoernLange/apds9960-rs?rev=27a128cb5a230a489ffa65edd862879fea6fbb82#27a128cb5a230a489ffa65edd862879fea6fbb82"
 dependencies = [
  "embedded-hal 1.0.0",
  "embedded-hal-async",
