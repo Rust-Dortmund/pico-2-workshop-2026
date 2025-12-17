@@ -1,16 +1,17 @@
 #![no_std]
 #![no_main]
 
-use apds9960::Apds9960Async;
 use defmt::*;
 use embassy_executor::Spawner;
 use embassy_rp::{
     Peripherals,
     gpio::{Level, Output},
-    i2c::InterruptHandler,
+    i2c::InterruptHandler, peripherals::I2C1,
 };
 use embassy_time::{Duration, Ticker};
 use {defmt_rtt as _, panic_probe as _};
+
+type Apds9960 = apds9960::Apds9960<embassy_rp::i2c::I2c<'static, I2C1, embassy_rp::i2c::Async>, apds9960::Async>;
 
 // Program metadata for `picotool info`.
 // This isn't needed, but it's recomended to have these minimal entries.
@@ -49,7 +50,7 @@ async fn main(_spawner: Spawner) {
     let scl = PIN_15;
     let config = embassy_rp::i2c::Config::default();
     let bus = embassy_rp::i2c::I2c::new_async(I2C1, scl, sda, Irqs, config);
-    let mut sensor = Apds9960Async::new(bus);
+    let mut sensor = Apds9960::new(bus);
 
     let device_id = sensor.read_device_id().await.unwrap();
     info!("APDS9960 Device Id: {}", device_id);
