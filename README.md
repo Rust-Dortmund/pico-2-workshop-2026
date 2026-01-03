@@ -1,4 +1,4 @@
-# Brainstorming Rust Dortmund Meetup Embedded Rust Workshop
+# Rust Dortmund Embedded Workshop
 
 ## Prerequisites
 
