@@ -5,7 +5,7 @@ Each subfolder in this repository contains one exercise.
 Exercises are numbered and build upon another both in terms of code and in difficulty, so doing them in order will be easiest.
 If you're new to embedded Rust or want to brush up your knowledge, there is a recording of a Rust Dortmund meetup talk giving a broad introduction to the topic at [TODO]().
 
-Except for the first exercise which doesn't yet involve any coding, the source code for each crate under `src` is intended as a starting point for the respective exercise.
+Except for the first exercise, which doesn't yet involve any coding, the source code for each crate under `src` is intended as a starting point for the respective exercise.
 Often times, this starting point will match a working solution of the previous exercise, in which case you are free to choose between using our code or continuing with a copy of your own previous solution.
 
 Should you get stuck, each exercise contains an example solution under its `example` folder that you can look at - since there are multiple ways to achieve the exercises' tasks, these solutions may not always match how your code is structured, but you can always compare against a previous example solution to see what has changed.
@@ -27,3 +27,21 @@ This is useful if, for example, you want to regularly update some output value (
 
 The provided code skeletons will help you along with how embassy works, but for more concrete hardware interactions (like turning on the LED) you will need to look at the documentation for the relevant types from [`embassy-rp`](https://docs.rs/embassy-rp/latest/embassy_rp/index.html).
 If you prefer to get a little bit of a head start upfront, there was recorded Rust Dortmund meetup talk about embassy that you can find at [TODO]().
+
+## Working with a Breadboard
+
+Over the course of the workshop, you will wire up different components to the Pico 2 to be able to control them from your code.
+To do so, you'll work on a so-called _breadboard_, an electrical board with multiple rows that has a grid of holes that you can insert pins into to connect different pieces of hardware without needing to solder anything together.
+
+The breadboard internally connects some of the inserted pins electrically to reduce the amount of wires required to assemble a circuit:
+a connection is made between all pins connected to the same `+` or `-` column (within the column, not from `+` to `-`).
+Additionally, all pins within the same half of each numbered row are connected, but the left and right halves of each row are separate:
+
+<div align="center">
+
+<img alt="Breadboard Internals" src="Breadboard.png" width="75%" />
+
+Breadboard Internals.
+By <a href="//commons.wikimedia.org/w/index.php?title=User:Guhuru&amp;action=edit&amp;redlink=1" class="new" title="User:Guhuru (page does not exist)">Guhuru</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="http://creativecommons.org/publicdomain/zero/1.0/deed.en" title="Creative Commons Zero, Public Domain Dedication">CC0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=97240411">Link</a>
+
+</div>
