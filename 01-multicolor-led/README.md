@@ -10,6 +10,10 @@ The multicolor LED has 3 channels: red, green and blue.
 You can turn each channel on or off individually by connecting it to a GPIO pin of the Pico 2 and setting that pin to "high", which causes current to flow through the LED that will power the selected channel.
 This also means that you can mix colors by giving current to more than one channel simultaneously.
 
+### LED Background
+
+_You may skip this subsection if you are already familiar with LED circuits._
+
 As a schematic, the LED looks like this:
 
 <div align="center">
@@ -30,6 +34,8 @@ This is illustrated on the following diagram:
 <img alt="Physical LED pins" src="Pins_LED.png" width="30%" />
 
 </div>
+
+### Wiring Instructions
 
 The following image shows how to wire up the LED and resistors.
 
