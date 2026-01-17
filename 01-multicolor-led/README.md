@@ -79,9 +79,8 @@ Your task for this exercise is to adapt our previous "Hello, World" program to c
 
 <summary>Running a cycle every half a second</summary>
 
-> [!TIP]
-> The starting code already contains a `Ticker` that you can use to wait for the specified time to pass by `.await`ing its `.next()` method.
-> Have a look at [its documentation](https://docs.rs/embassy-time/latest/embassy_time/struct.Ticker.html) in `embassy_time` to understand how it differs from sleeping for a fixed time.
+The starting code already contains a `Ticker` that you can use to wait for the specified time to pass by `.await`ing its `.next()` method.
+Have a look at [its documentation](https://docs.rs/embassy-time/latest/embassy_time/struct.Ticker.html) in `embassy_time` to understand how it differs from sleeping for a fixed time.
 
 </details>
 
@@ -89,10 +88,9 @@ Your task for this exercise is to adapt our previous "Hello, World" program to c
 
 <summary>Turning colors on and off</summary>
 
-> [!TIP]
-> The starting code already constructs an `Output` pin that you can control, but you'll need to change the underlying `PIN_N` peripheral used to create it to match the new wiring and add additional `Output`s for the other colors (pins 18-20).
->
-> Besides using `.toggle()` to flip the `Output` between on and off, you can also use [`set_high`](https://docs.rs/embassy-rp/latest/embassy_rp/gpio/struct.Output.html#method.set_high) or [`set_low`](https://docs.rs/embassy-rp/latest/embassy_rp/gpio/struct.Output.html#method.set_low) to set the pin / color to on or off directly.
+The starting code already constructs an `Output` pin that you can control, but you'll need to change the underlying `PIN_N` peripheral used to create it to match the new wiring and add additional `Output`s for the other colors (pins 18-20).
+
+Besides using `.toggle()` to flip the `Output` between on and off, you can also use [`set_high`](https://docs.rs/embassy-rp/latest/embassy_rp/gpio/struct.Output.html#method.set_high) or [`set_low`](https://docs.rs/embassy-rp/latest/embassy_rp/gpio/struct.Output.html#method.set_low) to set the pin / color to on or off directly.
 
 </details>
 
