@@ -1,12 +1,14 @@
 [package]
 edition = "2024"
-name = "multicolor-led-example"
+name = "rp2350-apds9960-distance-light-example"
 version = "0.1.0"
 
 [dependencies]
 embassy-executor = { version = "0.9.0", features = ["arch-cortex-m", "executor-thread", "executor-interrupt", "defmt"] }
 embassy-time = { version = "0.5.0", features = ["defmt", "defmt-timestamp-uptime"] }
 embassy-rp = { version = "0.9.0", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl", "rp235xa", "binary-info"] }
+
+apds9960 = { git = "https://github.com/BjoernLange/apds9960-rs", rev = "27a128cb5a230a489ffa65edd862879fea6fbb82", default-features=false, features=["async"] }
 
 defmt = "1.0.1"
 defmt-rtt = "1.0.0"
