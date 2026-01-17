@@ -1,7 +1,7 @@
 # Your Own "Hello World"
 
 While it sure is nice to see the Pico do something, 
-In this exercise, your task will be to extend our example program to control the provided multicolor RGB-LED instead of the onboard LED we've been making blink on the Pico's PCB.
+In this exercise, your task will be to extend our example program to control the provided multicolor RGB LED instead of the onboard LED we've been making blink on the Pico's PCB.
 To do so, you will need to wire up your first, small circuit on the breadboard to connect the LED and the Pico through some resistors.
 
 ## Wiring
@@ -61,3 +61,28 @@ Starting from the code provided for the onboard LED in `src/main.rs`, have a loo
 Same for the other embassy crates like `embassy_time`.
 
 Your task for this exercise is to adapt our previous "Hello, World" program to control the LED you just wired up instead of the little onboard LED - we want to make it cycle through its 3 channels, i.e., go from red to green to blue to red and so forth.
+
+<details>
+
+<summary>Hints</summary>
+
+<details>
+
+<summary>Running a cycle every half a second</summary>
+
+The starting code already contains a `Ticker` that you can use to wait for the specified time to pass by `.await`ing its `.next()` method.
+Have a look at [its documentation](https://docs.rs/embassy-time/latest/embassy_time/struct.Ticker.html) in `embassy_time` to understand how it differs from sleeping for a fixed time.
+
+</details>
+
+<details>
+
+<summary>Turning colors on and off</summary>
+
+The starting code already constructs an `Output` pin that you can control, but you'll need to change the underlying `PIN_N` peripheral used to create it to match the new wiring and add additional `Output`s for the other colors (pins 18-20).
+
+Besides using `.toggle()` to flip the `Output` between on and off, you can also use [`set_high`](https://docs.rs/embassy-rp/latest/embassy_rp/gpio/struct.Output.html#method.set_high) or [`set_low`](https://docs.rs/embassy-rp/latest/embassy_rp/gpio/struct.Output.html#method.set_low) to set the pin / color to on or off directly.
+
+</details>
+
+</details>
