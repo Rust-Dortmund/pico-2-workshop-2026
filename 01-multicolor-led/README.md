@@ -49,6 +49,9 @@ The following image shows how to wire up the LED and resistors.
 We're using GPIO pins 18 to 20 for the blue, red and green channel (respectively) and the pin right below them should be labelled ground in the pinout.
 If you position the Pico 2 right at the top of the breadboard, you can match the pin numbers against the row numbers on the left-hand side of the board.
 
+> [!IMPORTANT]
+> Make sure that the LED is oriented such that its longest leg is on the lower side of the LED, towards the bottom of the breadboard (it should be the second pin from the bottom, the one that doesn't have a resistor).
+
 After placing the resistors and the LED on the breadboard, wire up a connection between the output pins and the resistors and between the two ground pins of the Pico 2 and the LED.
 You might need to bend the ends of the pins a little to make them fit into the correct holes on the breadboard.
 The resistors are all the same, so don't worry about getting them mixed up - it doesn't matter which resistor goes where.
