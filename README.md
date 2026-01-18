@@ -1,9 +1,14 @@
 # Rust Dortmund Embedded Workshop
 
+TODO: Generate QR code
+
 This workshop contains a series of exercises about starting to write embedded Rust with the Raspberry Pi Pico 2.
 Each subfolder in this repository contains one exercise.
 Exercises are numbered and build upon another both in terms of code and in difficulty, so doing them in order will be easiest.
 If you're new to embedded Rust or want to brush up your knowledge, there is a recording of a Rust Dortmund meetup talk giving a broad introduction to the topic at [TODO]().
+
+There are hints for most exercises inside the README instructions for each subfolder as well to help you along the way.
+Make sure to browse the rendered instructions and not the raw markdown files if you don't want to be spoiled.
 
 Except for the first exercise, which doesn't yet involve any coding, the source code for each crate under `src` is intended as a starting point for the respective exercise.
 Often times, this starting point will match a working solution of the previous exercise, in which case you are free to choose between using our code or continuing with a copy of your own previous solution.

@@ -4,7 +4,7 @@
 use defmt::*;
 use embassy_executor::Spawner;
 use embassy_rp::{
-    Peripherals, gpio::{Level, Output}, i2c::InterruptHandler, peripherals::I2C1
+    Peripherals, gpio::{Level, Output},  peripherals::I2C1
 };
 use embassy_time::{Duration, Ticker};
 use {defmt_rtt as _, panic_probe as _};
