@@ -29,26 +29,12 @@ impl TriColorLed {
 impl TriColorLed {
     /// Change the color of the LED.
     pub(crate) fn set_color(&mut self, color: Color) {
-        // Make sure the previous color is turned off before switching on the new color.
-        let was_on = self.on;
-        if self.on {
-            self.toggle();
-        }
-        self.color = color;
-        if was_on {
-            self.toggle();
-        }
+        todo!("set the LED color to `color`")
     }
 
     /// Switch the LED from on to off or vice-versa.
     pub(crate) fn toggle(&mut self) {
-        let new_level = if self.on { Level::Low } else { Level::High };
-        self.on = !self.on;
-        match self.color {
-            Color::Red => self.red_led.set_level(new_level),
-            Color::Green => self.green_led.set_level(new_level),
-            Color::Blue => self.blue_led.set_level(new_level),
-        }
+        todo!("toggle the correct output on or off")
     }
 }
 
