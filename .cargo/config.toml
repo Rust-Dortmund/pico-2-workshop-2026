@@ -5,4 +5,4 @@ target = "thumbv8m.main-none-eabihf"
 runner = "probe-rs run --chip RP235x"
 
 [env]
-DEFMT_LOG= { value = "debug" }
+DEFMT_LOG= { value = "debug,cyw43=error" }
