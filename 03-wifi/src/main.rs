@@ -10,12 +10,12 @@ mod mk_static;
 mod webserver;
 
 use crate::{
-    led_controller::LedControllerRunner,
-    webserver::WebserverRunner,
+    led_controller::{ColorWatch, LedControllerRunner},
+    webserver::{WebserverRunner, WebserverRunnerFactory},
 };
 use cyw43::{JoinOptions, NetDriver};
 use cyw43_pio::{PioSpi, RM2_CLOCK_DIVIDER};
-use defmt::*;
+use defmt::info;
 use embassy_executor::Spawner;
 use embassy_net::StackResources;
 use embassy_rp::{
@@ -29,8 +29,8 @@ use embassy_time::{Duration, Timer};
 use {defmt_rtt as _, panic_probe as _};
 
 // Include the firmware for the WiFi chip.
-const CYW43_FIRMWARE: &[u8; 231_077] = include_bytes!("../../cyw43-firmware/43439A0.bin");
-const CYW43_CLM: &[u8; 984] = include_bytes!("../../cyw43-firmware/43439A0_clm.bin");
+const CYW43_FIRMWARE: &[u8; 231_077] = include_bytes!("../cyw43-firmware/43439A0.bin");
+const CYW43_CLM: &[u8; 984] = include_bytes!("../cyw43-firmware/43439A0_clm.bin"); 
 
 // Load SSID and WiFi password from environment variables at build time.
 const SSID: &str = env!("SSID");
@@ -170,10 +170,10 @@ async fn main(spawner: Spawner) {
 
     // Now our tasks:
     info!("Initializing LED controller");
-    let (led_controller_runner, watch) = led_controller::initialize(PIN_19, PIN_20, PIN_18);
+    let (led_controller_runner, watch): (LedControllerRunner, &'static ColorWatch) = todo!("Initialize LED controller");
 
     info!("Initializing web server");
-    let mut webserver_task_factory = webserver::initialize(network_stack, watch.sender());
+    let mut webserver_task_factory: WebserverRunnerFactory = todo!("Initialize the webserver");
 
     info!("Spawning tasks");
     spawner.must_spawn(run_print_ip(print_ip_runner));
@@ -188,10 +188,7 @@ async fn main(spawner: Spawner) {
 
     // Finally, connect to the local WiFi once everything is running.
     info!("Joining network");
-    control
-        .join(SSID, JoinOptions::new(PASSWORD.as_bytes()))
-        .await
-        .unwrap();
+    todo!("Actually join WiFi network");
     info!("Joined network");
 
     // Not much to do in `main` anymore, since all of the networking stuff runs through the stack.

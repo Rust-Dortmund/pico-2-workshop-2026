@@ -24,14 +24,11 @@ impl AppWithStateBuilder for AppProps {
             post(
                 |color: Color, State(sender): State<ColorSender>| async move {
                     info!("[Webserver] Setting led to {}", color);
-                    // Notify the LED controller of the new color.
-                    sender.send(color);
-                    // Return a JSON body containing the new color.
-                    match color {
-                        Color::Red => r#"{"color":"red"}"#,
-                        Color::Green => r#"{"color":"green"}"#,
-                        Color::Blue => r#"{"color":"blue"}"#,
-                    }
+
+                    todo!("Notify the LED controller of the new color.");
+
+                    todo!("Return a JSON body containing the new color.");
+                    ()
                 },
             ),
         )
@@ -55,14 +52,9 @@ impl WebserverRunner {
         let mut tcp_tx_buffer = [0; 1024];
         let mut http_buffer = [0; 2048];
 
-        // Create a `picoserve` server on top of the `embassy` net stack.
-        let app = self.app.shared().with_state(self.state);
-        let server = picoserve::Server::new(&app, self.config, &mut http_buffer);
+        let server = todo!("Create a `picoserve` server on top of the `embassy` net stack.");
 
-        // Listen for incoming requests that the server will then handle.
-        match server.listen_and_serve(self.id, self.stack, Self::PORT, &mut tcp_rx_buffer, &mut tcp_tx_buffer).await {
-            // This can only happen if the server is set up `with_graceful_shutdown`, which we don't use.
-        }
+        todo!("Listen for incoming requests that the server will then handle.");
     }
 }
 
