@@ -1,0 +1,3 @@
+[toolchain]
+channel = "nightly-2026-01-23"
+targets = [ "thumbv8m.main-none-eabihf" ]

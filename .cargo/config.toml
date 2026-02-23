@@ -1,4 +1,8 @@
-# TODO: From https://github.com/thecodechemist99/pinetime-rust
+[build]
+target = "thumbv8m.main-none-eabihf"
+
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
-# replace nRF52832_xxAA with your chip as listed in `probe-run --list-chips`
-#runner = "probe-run --chip nRF52832_xxAA"
+runner = "probe-rs run --chip RP235x"
+
+[env]
+DEFMT_LOG= { value = "debug,cyw43=error" }
