@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Embedded Rust 👀</title>
+
+    <link rel="stylesheet" href="dist/reset.css">
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/serif.css">
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/monokai.css">
+
+    <!-- Custom CSS -->
+    <style>
+        .columns {
+            display: flex;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        li {
+            font-size: 90%;
+
+            li li li {
+                font-size: 100%;
+            }
+        }
+
+        code {
+            border-radius: 0.5em;
+        }
+
+        .svg-stack {
+            position: relative;
+            width: 900px;
+            height: 600px;
+            margin: 0 auto;
+        }
+
+        .svg-stack img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .fragment.current-visible.nospace:not(.current-fragment) {
+            display: none;
+            height: 0px;
+            line-height: 0px;
+            font-size: 0px;
+        }
+
+        .fragment.current-visible.nospace.current-fragment div code {
+            max-height: 100%;
+            overflow-x: hidden;
+        }
+
+        .fragment.current-visible.nospace.current-fragment div pre {
+            width: 98%;
+        }
+
+        .fragment.current-visible.nospace.current-fragment {
+            display: flex;
+            position: fixed;
+            overflow-y: hidden;
+            z-index: 2400;
+            opacity: 0.90;
+            top: 0px !important;
+            -webkit-transition: all 0.5s ease-in-out;
+            -moz-transition: all 0.5s ease-in-out;
+            -ms-transition: all 0.5s ease-in-out;
+            -o-transition: all 0.5s ease-in-out;
+            transition: all 0.5s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+
+                <section data-markdown data-separator-vertical="^\r?\n---\s*\r?\n$" data-separator-notes="^Notes:">
+                    <textarea data-template>
+                        ![Embedded Rust Logo](static/rust-embedded-logo-256x256.png)
+                        ## Embedded Rust Workshop
+                        #### A Practical Hands-On with the Raspberry Pi Pico 2
+
+                        ---
+
+                        ### What You're Gonna Do Today
+
+                        - Listen to a short introduction (in progress) <!-- .element: class="fragment" -->
+                        - Get your Pico 2 hardware <!-- .element: class="fragment" -->
+                        - Make it blink <!-- .element: class="fragment" -->
+                        - Make it notice you <!-- .element: class="fragment" -->
+                        - Break the workshop WiFi (probably) <!-- .element: class="fragment" -->
+                        - Go at your own pace <!-- .element: class="fragment" -->
+
+                        ---
+
+                        ### Meet the Pico 2
+                        
+                        <div class="r-stack r-stretch" style="justify-content: center;">
+                            <img src="static/rp2350.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment current-visible" data-fragment-index="1" src="static/rp2350_proc.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment current-visible" data-fragment-index="2" src="static/rp2350_clock.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment current-visible" data-fragment-index="3" src="static/rp2350_memory.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment current-visible" data-fragment-index="4" src="static/rp2350_gpio.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment current-visible" data-fragment-index="5" src="static/rp2350_peripherals.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment current-visible" data-fragment-index="6" src="static/rp2350_serial.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment current-visible" data-fragment-index="7" src="static/rp2350_adc.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment fade-in" data-fragment-index="8" src="static/rp2350_watchdog.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                        </div>
+
+                        <p style="font-size: large; margin: 0; padding: 0;"><it>
+                        Source: <a href="https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf">RP2350 Datasheet</a>, Figure 1
+                        </it></p>
+
+                        Notes:
+                        - The RP2350 contains (non-exhaustive):
+                          - two independent Cortex-M33 processors (top right, which in turn contain all of the circuitery discussed before. Note that this means that the RP2350 can do multithreading),
+                          - a hardware clock (top left),
+                          - \[a direct memory access (DMA) controller (top right),\]
+                          - a bunch of memory (bottom right), including
+                            - the boot ROM, which contains the microcontroller version of your computer's BIOS,
+                            - 520 kB of RAM that you can use in your program, and 
+                            - some read-only memory with things like a unique serial number,
+                          - two banks of general-purpose IO (GPIO) pins (left) that you can use to connect to other chips, and
+                          - a bunch of smaller processors called "peripherals" (middle left), which help you with various things like
+                            - communicating over GPIO (implementing serial protocols like I2C, SPI, or UART),
+                            - modulating and converting inputs / outputs (e.g. measuring analog voltages or temperatures), or
+                            - making sure your code doesn't get stuck (watchdog).
+
+                        
+                        ---
+
+                        <!-- .slide: data-transition="none" -->
+                        ### Working with `#[no_std]`
+
+                        <img class="r-stretch" src="static/tiered_std.png" alt="Tiered STD" style="margin: 0; padding: 0;" />
+                        
+                        <p style="font-size: large; margin: 0; padding: 0;"><it>
+                        Based on <a href="https://google.github.io/comprehensive-rust/bare-metal/no_std.html">Comprehensive Rust</a>
+                        </it></p>
+
+                        Notes:
+                        - `HashMap` depends on RNG.
+                        - `std` re-exports the contents of both `core` and `alloc`.
+
+                    
+                        ---
+
+                        #### The Embedded Rust Abstraction Hierarchy
+                        
+                        <div class="svg-stack">
+                            <img style="max-width: 85%;" src="static/embedded_hierarchy_with_embassy_step1.svg" alt="Embedded Hierarchy" class="fragment fade-in-then-out" data-fragment-index="0"/>
+                            <img style="max-width: 85%;" src="static/embedded_hierarchy_with_embassy_step2.svg" alt="Embedded Hierarchy with embassy" class="fragment" data-fragment-index="1"/>
+                        </div>
+        
+                        <p style="font-size: large; margin: 0; padding: 0;" class="fragment" data-fragment-index="0"><it>
+                        Source: <a href="https://docs.rust-embedded.org/book/start/registers.html">Embedded Rust Book</a>, modified by us
+                        </it></p>
+
+
+                        ---
+
+                        ### `embassy` Overview
+
+                        <div class="svg-stack">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step1.svg" class="fragment" data-fragment-index="0">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step2.svg" class="fragment" data-fragment-index="1">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step3.svg" class="fragment" data-fragment-index="2">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step4.svg" class="fragment" data-fragment-index="3">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step5.svg" class="fragment" data-fragment-index="4">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step6.svg" class="fragment" data-fragment-index="5">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step7.svg" class="fragment" data-fragment-index="6">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step8.svg" class="fragment" data-fragment-index="7">
+                        </div>
+
+                        Notes:
+
+                        - Feature-list: https://embassy.dev/book/#_features_2
+                        - embassy is not an OS: No preemption, built-in hardware abstraction, etc.
+
+                    </textarea>
+                </section>
+                <section>
+
+                    <p>Find the Workshop:</p>
+                    <img src="static/Workshop_QR.gif" width="30%" style="margin: 5px; border: 1px solid black; border-radius: 10px;" />
+                    <p style="font-size: large;"><code>https://github.com/Rust-Dortmund/pico-2-workshop-2026/</code></p>
+                </section>
+            </section>
+        </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script>
+        // More info about initialization & config:
+        // - https://revealjs.com/initialization/
+        // - https://revealjs.com/config/
+        Reveal.initialize({
+            controls: "speaker-only",
+            controlsTutorial: false,
+            slideNumber: "c/t",
+            hash: true,
+            totalTime: 45 * 60,
+
+            // Learn about plugins: https://revealjs.com/plugins/
+            plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealZoom]
+        });
+    </script>
+</body>
+
+</html>

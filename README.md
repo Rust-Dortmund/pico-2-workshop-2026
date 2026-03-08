@@ -1,6 +1,6 @@
 # Rust Dortmund Embedded Workshop
 
-TODO: Generate QR code
+<img alt="QR Code to this Repo" src="000-intro/static/Workshop_QR.gif" width="25%" />
 
 This workshop contains a series of exercises about starting to write embedded Rust with the Raspberry Pi Pico 2.
 Each subfolder in this repository contains one exercise.
@@ -50,3 +50,9 @@ Breadboard Internals.
 By <a href="//commons.wikimedia.org/w/index.php?title=User:Guhuru&amp;action=edit&amp;redlink=1" class="new" title="User:Guhuru (page does not exist)">Guhuru</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="http://creativecommons.org/publicdomain/zero/1.0/deed.en" title="Creative Commons Zero, Public Domain Dedication">CC0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=97240411">Link</a>
 
 </div>
+
+## License and Attributions
+
+The presentation framework RevealJS used to create the introduction slides is licensed under an MIT license (see [LICENSE-RevealJS](000-intro/LICENSE-RevealJS)).
+
+The logo from awesome embedded Rust is licensed under the [CC0 1.0 Universal License](https://creativecommons.org/publicdomain/zero/1.0/legalcode).
