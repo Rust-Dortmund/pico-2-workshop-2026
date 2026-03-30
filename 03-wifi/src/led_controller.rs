@@ -19,7 +19,7 @@ use crate::{
 // We need to pick appropriate values for the 2 generic parameters of `Watch`:
 //   1. The synchronization primitive. Since we know we're only running only single-threaded code
 //      and all our tasks run on a regular embassy executor, which means that scheduling is 
-//      cooperative and our tasks cannot be interrupted, we use a eno-op" mutex that doesn't 
+//      cooperative and our tasks cannot be interrupted, we use a "no-op" mutex that doesn't 
 //      actually do anything to protect against data races. After all, if there's only a single 
 //      thread, there's no one else racing!
 //   2. The maximum number of `Receiver`s we want to use at the same time. Since we only want the 

@@ -4,6 +4,7 @@ In this first exercise, you will set up everything you need to have your own cod
 This mostly serves as a checkpoint to make sure that you're ready to go and there isn't anything wrong with your setup or with the hardware that you were provided with - you'll write your own code starting from the next exercise.
 
 If you want to look into the Pico 2 some more, you can find Raspberry's page for it [here](https://www.raspberrypi.com/products/raspberry-pi-pico-2/) or you can always have a look into the [Pico 2's datasheet](https://pip-assets.raspberrypi.com/categories/1088-raspberry-pi-pico-2-w/documents/RP-008304-DS-1-pico-2-w-datasheet.pdf?disposition=inline) or the [datasheet of the Pico 2's RP2350 processor](https://pip-assets.raspberrypi.com/categories/1214-rp2350/documents/RP-008373-DS-2-rp2350-datasheet.pdf?disposition=inline), which is very comprehensive and contains some useful illustrations.
+A copy of the datasheets is also available in the [`datasheets`](../datasheets) directory of this repository.
 
 ## Installing Rust
 
@@ -57,7 +58,7 @@ and follow its instructions to enable shell completions.
 
 ## Connecting the Debug Probe
 
-To use `probe-rs` and run our program, you will need to connect your laptop to the Pico 2 via the provided Raspberry Pi debug probe.
+To use `probe-rs` and run the example program, you will need to connect your laptop to the Pico 2 via the provided Raspberry Pi debug probe.
 Connect the top side of the probe that only has a single micro-USB port to your laptop via the included USB cable (if your laptop doesn't have a USB-A port, use the adapter you brought).
 On the bottom side, find the included cable that has a plug matching the bottom ports on _both ends_ and plug one end into the **D** port.
 Then, plug the other end of the cable into the matching socket labeled "DEBUG" on the Pico 2, directly below the RP2350 processor with the printed-on Raspberry logo on the right-hand side of the PCB.
