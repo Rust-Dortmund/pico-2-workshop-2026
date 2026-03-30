@@ -1,6 +1,6 @@
 # Your Own "Hello World"
 
-While it sure is nice to see the Pico do something, 
+While it sure is nice to see the Pico do something, it is even nicer to see it do something that you told it!
 In this exercise, your task will be to extend our example program to control the provided multicolor RGB LED instead of the onboard LED we've been making blink on the Pico's PCB.
 To do so, you will need to wire up your first, small circuit on the breadboard to connect the LED and the Pico through some resistors.
 
@@ -22,7 +22,7 @@ As a schematic, the LED looks like this:
 
 </div>
 
-There is one pin per channel, plus a shared pin for connecting back to ground / 0V (this is taken from the [LED's datasheet](https://www.inolux-corp.com/datasheet/Inolux%20Lamp/TH%20Lamp/HV-5RGBXX%205mm%20Full-Color%20Series.pdf), which you can also find in the `datasheets` folder in this repository).
+There is one pin per channel, plus a shared pin for connecting back to ground / 0V (this is taken from the [LED's datasheet](https://www.inolux-corp.com/datasheet/Inolux%20Lamp/TH%20Lamp/HV-5RGBXX%205mm%20Full-Color%20Series.pdf), which you can also find in the [`datasheets`](../datasheets) folder in this repository).
 We'll wire one output pin of the Pico 2 to each channel with a resistor in between to protect the LED and wire up the LED's ground pin to connect to a Pico 2 pin that exposes the Pico's ground so both parts agree on what 0V means exactly.
 
 Note how the pins / channels of the LED are numbered: pin 1 is green, 2 is red, 3 is ground and 4 is blue.
@@ -66,10 +66,10 @@ They can also go in either orientation, just make sure to make the connection wi
 ## Coding
 
 As mentioned in the top-level README, we use the [Embassy framework](https://embassy.dev/) to implement different tasks that we want to run on the Pico 2 (for this exercise, just 1 task / just the `main` function is enough).
-Starting from the code provided for the onboard LED in `src/main.rs`, have a look at the [Embassy documentation for the RP2350](https://docs.rs/embassy-rp/0.9.0/embassy_rp/) to find out how they represent the hardware we're working with, what methods are available, etc.
+Starting from the code provided in `src/main.rs`, have a look at the [Embassy documentation for the RP2350](https://docs.rs/embassy-rp/0.9.0/embassy_rp/) to find out how to represent the hardware we're working with, what methods are available, etc.
 Same for the other embassy crates like `embassy_time`.
 
-Your task for this exercise is to adapt our previous "Hello, World" program to control the LED you just wired up instead of the little onboard LED - we want to make it cycle through its 3 channels, i.e., go from red to green to blue to red and so forth.
+Your task for this exercise is to adapt the program skeleton to control the LED you just wired up - we want to make it cycle through its 3 channels, i.e., go from red to green to blue to red and so forth.
 
 <details>
 

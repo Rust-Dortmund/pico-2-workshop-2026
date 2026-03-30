@@ -17,9 +17,11 @@ use crate::{
 
 // Type definitions for channel types that we can use to send `Color` values.
 // We need to pick appropriate values for the 2 generic parameters of `Watch`:
-//   1. The synchronization primitive. Since we know we're only running only single-threaded code,
-//      we use a "no-op" mutex that doesn't actually do anything to protect against data races.
-//      After all, if there's only a single thread, there's no one else racing!
+//   1. The synchronization primitive. Since we know we're only running only single-threaded code
+//      and all our tasks run on a regular embassy executor, which means that scheduling is 
+//      cooperative and our tasks cannot be interrupted, we use a "no-op" mutex that doesn't 
+//      actually do anything to protect against data races. After all, if there's only a single 
+//      thread, there's no one else racing!
 //   2. The maximum number of `Receiver`s we want to use at the same time. Since we only want the 
 //      `LedControllerRunner` to receive new color values, we only need 1.
 pub(crate) type ColorWatch = Watch<NoopRawMutex, Color, 1>;

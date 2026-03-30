@@ -23,10 +23,10 @@ _There are no wiring changes for this exercise._
 
 For this exercise, you'll have to do 4 things:
 
-1. Implement a `TriColorLed` that keeps track of which color it is currently blinking
-2. Complete the request handler for the POST request and the initialization function of the webserver
+1. Implement a `TriColorLed` that keeps track of which color it is currently blinking.
+2. Complete the request handler for the POST request and the initialization function of the webserver.
 3. Finish the implementation of the `LedControllerRunner` responsible for blinking the LED and changing its color.
-4. Initialize everything in `main`, join the WiFi network and start the webserver
+4. Initialize everything in `main`, join the WiFi network and start the webserver.
 
 ### Setting Up the LED Abstraction
 
