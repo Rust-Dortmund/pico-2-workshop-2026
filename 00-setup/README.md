@@ -59,8 +59,16 @@ and follow its instructions to enable shell completions.
 ## Connecting the Debug Probe
 
 To use `probe-rs` and run the example program, you will need to connect your laptop to the Pico 2 via the provided Raspberry Pi debug probe.
+
+<div align="center">
+
+<img alt="Debug probe wiring with arrow annotations" src="Debug-Probe-Wiring-with-arrows.jpg" width="75%" />
+
+</div>
+
 Connect the top side of the probe that only has a single micro-USB port to your laptop via the included USB cable (if your laptop doesn't have a USB-A port, use the adapter you brought).
 On the bottom side, find the included cable that has a plug matching the bottom ports on _both ends_ and plug one end into the **D** port.
+Note that the plugs on this cable need to be oriented correctly to fit into the port, do not force them into the port!
 Then, plug the other end of the cable into the matching socket labeled "DEBUG" on the Pico 2, directly below the RP2350 processor with the printed-on Raspberry logo on the right-hand side of the PCB.
 Once done, running `probe-rs list` should show that a single debug probe (labeled `[0]`) was found which is called something like `CMSIS-DAP`.
 
