@@ -3,7 +3,7 @@
 This workshop contains a series of exercises about starting to write embedded Rust with [`embassy`](https://embassy.dev/) targeting the the Raspberry Pi Pico 2.
 Each subfolder in this repository contains one exercise.
 Exercises are numbered and build upon another both in terms of code and in difficulty, so doing them in order will be easiest.
-If you're new to embedded Rust or want to brush up your knowledge, there is a recording of a Rust Dortmund meetup talk giving a broad introduction to the topic at [TODO]().
+If you're new to embedded Rust or want to brush up your knowledge, there is a recording of a Rust Dortmund meetup talk giving a broad introduction to the topic that you can find [here](https://www.youtube.com/watch?v=BXjcAf0Z95Q).
 
 There are hints for most exercises inside the README instructions for each subfolder to help you along the way.
 Make sure to browse the rendered instructions and not the raw markdown files if you don't want to be spoiled.
