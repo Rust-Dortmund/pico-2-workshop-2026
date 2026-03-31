@@ -1,7 +1,5 @@
 # Rust Dortmund Embedded Workshop
 
-<img alt="QR Code to this Repo" src="000-intro/static/Workshop_QR.gif" width="25%" />
-
 This workshop contains a series of exercises about starting to write embedded Rust with the Raspberry Pi Pico 2.
 Each subfolder in this repository contains one exercise.
 Exercises are numbered and build upon another both in terms of code and in difficulty, so doing them in order will be easiest.
