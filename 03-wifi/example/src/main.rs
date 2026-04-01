@@ -29,8 +29,8 @@ use embassy_time::{Duration, Timer};
 use {defmt_rtt as _, panic_probe as _};
 
 // Include the firmware for the WiFi chip.
-const CYW43_FIRMWARE: &[u8; 231_077] = include_bytes!("../../cyw43-firmware/43439A0.bin");
-const CYW43_CLM: &[u8; 984] = include_bytes!("../../cyw43-firmware/43439A0_clm.bin");
+const CYW43_FIRMWARE: &[u8; 231_077] = include_bytes!("../../../cyw43-firmware/43439A0.bin");
+const CYW43_CLM: &[u8; 984] = include_bytes!("../../../cyw43-firmware/43439A0_clm.bin");
 
 // Load SSID and WiFi password from environment variables at build time.
 const SSID: &str = env!("SSID");

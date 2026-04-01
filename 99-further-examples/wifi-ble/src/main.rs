@@ -141,9 +141,9 @@ async fn main(spawner: Spawner) {
         ..
     } = embassy_rp::init(Default::default());
     let mut rng = RoscRng;
-    let cyw43_firmware = include_bytes!("../cyw43-firmware/43439A0.bin");
-    let cyw43_clm = include_bytes!("../cyw43-firmware/43439A0_clm.bin");
-    let cyw43_bluetooth_firmware = include_bytes!("../cyw43-firmware/43439A0_btfw.bin");
+    let cyw43_firmware = include_bytes!("../../../cyw43-firmware/43439A0.bin");
+    let cyw43_clm = include_bytes!("../../../cyw43-firmware/43439A0_clm.bin");
+    let cyw43_bluetooth_firmware = include_bytes!("../../../cyw43-firmware/43439A0_btfw.bin");
 
     let cyw43_power = Output::new(PIN_23, Level::Low);
     let cyw43_chip_select = Output::new(PIN_25, Level::High);
