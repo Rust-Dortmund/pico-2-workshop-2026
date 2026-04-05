@@ -90,6 +90,10 @@ impl BleConnectionRunner {
     }
 
     /// Handles read access to a characteristic in a GATT service.
+    ///
+    /// # Cancellation safety
+    ///
+    /// This function is cancel safe.
     async fn handle_gatt_read<P: PacketPool>(event: ReadEvent<'_, '_, P>, server: &Server<'_>) {
         if event.handle() == server.led_service.color.handle {
             // This is for the `color` characteristic.
@@ -101,13 +105,20 @@ impl BleConnectionRunner {
 
         // Accepting and then sending the read event queries the currently cached value and returns it over BLE.
         match event.accept() {
+            // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
             Ok(reply) => reply.send().await,
             Err(e) => info!("[gatt] error sending response: {:?}", e),
         };
     }
 
+    /// Accepts a [`WriteEvent`] to a characteristic in a GATT service.
+    ///
+    /// # Cancellation safety
+    ///
+    /// This function is cancel safe.
     async fn accept_write_event<P: PacketPool>(event: WriteEvent<'_, '_, P>) {
         match event.accept() {
+            // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
             Ok(reply) => reply.send().await,
             Err(e) => {
                 info!("[gatt] error sending response: {:?}", e)
@@ -116,6 +127,10 @@ impl BleConnectionRunner {
     }
 
     /// Handles write access to a characteristic in a GATT service.
+    ///
+    /// # Cancellation safety
+    ///
+    /// This function is cancel safe.
     async fn handle_gatt_write<P: PacketPool>(
         event: WriteEvent<'_, '_, P>,
         server: &Server<'_>,
@@ -138,17 +153,21 @@ impl BleConnectionRunner {
             match *event.data() {
                 [COLOR_RED] => {
                     sender.send(Color::Red);
+                    // CANCELLATION SAFETY: Documented as being cancel safe.
                     Self::accept_write_event(event).await;
                 }
                 [COLOR_GREEN] => {
                     sender.send(Color::Green);
+                    // CANCELLATION SAFETY: Documented as being cancel safe.
                     Self::accept_write_event(event).await;
                 }
                 [COLOR_BLUE] => {
                     sender.send(Color::Blue);
+                    // CANCELLATION SAFETY: Documented as being cancel safe.
                     Self::accept_write_event(event).await;
                 }
                 _ => match event.reject(AttErrorCode::OUT_OF_RANGE) {
+                    // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
                     Ok(reply) => reply.send().await,
                     Err(e) => {
                         info!("[gatt] error sending response: {:?}", e)
@@ -162,18 +181,25 @@ impl BleConnectionRunner {
     ///
     /// This function will handle the GATT events and process them.
     /// This is how we interact with read and write requests.
+    ///
+    /// # Cancellation safety
+    ///
+    /// This function is cancel safe.
     async fn gatt_events_task<P: PacketPool>(
         server: &Server<'_>,
         connection: &GattConnection<'_, '_, P>,
         sender: &ColorSender<2>,
     ) -> Result<(), trouble_host::prelude::Error> {
         let reason = loop {
+            // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
             match connection.next().await {
                 GattConnectionEvent::Disconnected { reason } => break reason,
                 GattConnectionEvent::Gatt { event } => {
                     match event {
+                        // CANCELLATION SAFETY: Documented as being cancel safe.
                         GattEvent::Read(event) => Self::handle_gatt_read(event, server).await,
                         GattEvent::Write(event) => {
+                            // CANCELLATION SAFETY: Documented as being cancel safe.
                             Self::handle_gatt_write(event, server, sender).await
                         }
                         _ => {}
@@ -187,17 +213,22 @@ impl BleConnectionRunner {
     }
 
     /// This task will notify the connected central of changes to characteristics.
-    /// 
+    ///
     /// In our case there is only the color charcateristic.
     /// If the color changes then we update the cached value in the BLE server which will trigger a
     /// notify message to the connected central.
     ///
     /// This function stops when the connection is closed by the central or an error occurs.
+    ///
+    /// # Cancellation safety
+    ///
+    /// This function is cancel safe.
     async fn notify_task<P: PacketPool>(
         server: &Server<'_>,
         connection: &GattConnection<'_, '_, P>,
         receiver: &mut ColorReceiver<2>,
     ) {
+        // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
         if let Some(new_color) = receiver.try_get()
             && server
                 .led_service
@@ -211,7 +242,11 @@ impl BleConnectionRunner {
         }
 
         loop {
+            // CANCELLATION SAFETY: `embassy_sync::watch::Receiver::changed` is not documented as being cancel safe, but
+            // should be according to [this comment](https://github.com/embassy-rs/embassy/issues/5484#issuecomment-3921041927).
+            // Also see [this issue](https://github.com/embassy-rs/embassy/issues/5796).
             let new_color: u8 = receiver.changed().await.into();
+            // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
             if server
                 .led_service
                 .color
@@ -230,12 +265,17 @@ impl BleConnectionRunner {
         loop {
             match Self::advertise("LED Trouble", &mut self.peripheral, &self.server).await {
                 Ok(connection) => {
-                    // set up tasks when the connection is established to a central, so they don't run when no one is connected.
-                    let a = Self::gatt_events_task(&self.server, &connection, &self.sender);
-                    let b = Self::notify_task(&self.server, &connection, &mut self.receiver);
-                    // run until any task ends (usually because the connection has been closed),
+                    // Set up tasks when the connection is established to a central, so they don't run when no one is connected.
+                    let gatt_events_task =
+                        Self::gatt_events_task(&self.server, &connection, &self.sender);
+                    let notify_task =
+                        Self::notify_task(&self.server, &connection, &mut self.receiver);
+                    // Run until any task ends (usually because the connection has been closed),
                     // then return to advertising state.
-                    select(a, b).await;
+                    // CANCELLATION SAFETY:
+                    // - `Self::gatt_events_task` is documented as being cancel safe.
+                    // - `Self::notify_task` is documented as being cancel safe.
+                    select(gatt_events_task, notify_task).await;
                 }
                 Err(e) => {
                     panic!("[adv] error: {:?}", e);
