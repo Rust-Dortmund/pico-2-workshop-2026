@@ -1,18 +1,24 @@
 #![no_std]
 #![no_main]
 
+use core::pin::pin;
+
 use defmt::*;
 use embassy_executor::Spawner;
 use embassy_futures::select::{Either, select};
 use embassy_rp::{
     Peripherals,
     gpio::{Input, Level, Output, Pull},
-    i2c::InterruptHandler, peripherals::I2C1,
+    i2c::InterruptHandler,
+    peripherals::I2C1,
 };
 use embassy_time::Timer;
 use {defmt_rtt as _, panic_probe as _};
 
-type Apds9960 = apds9960::Apds9960<embassy_rp::i2c::I2c<'static, I2C1, embassy_rp::i2c::Async>, apds9960::Async>;
+type Apds9960 = apds9960::Apds9960<
+    embassy_rp::i2c::I2c<'static, I2C1, embassy_rp::i2c::Async>,
+    apds9960::Async,
+>;
 
 // Program metadata for `picotool info`.
 // This isn't needed, but it's recomended to have these minimal entries.
@@ -183,17 +189,32 @@ async fn main(_spawner: Spawner) {
 
     let mut state = LampState::Off;
 
-    loop {
-        detector.wait_for_detected_gesture().await;
+    detector.wait_for_detected_gesture().await;
 
+    loop {
         state = state.proceed();
         let (red_level, green_level, blue_level) = state.get_levels();
         output_red.set_level(red_level);
         output_green.set_level(green_level);
         output_blue.set_level(blue_level);
 
-        while let Either::First(()) =
-            select(detector.wait_for_detected_gesture(), Timer::after_secs(1)).await
-        {}
+        // After a gesture was detected, ignore new gestures for one second to prevent duplicate detections.
+        loop {
+            // `wait_for_detected_gesture` is not cancel safe, we need to run the future to completion!
+            let mut wait_for_detected_gesture = pin!(detector.wait_for_detected_gesture());
+
+            // CANCELLATION SAFETY: There is no documentation on the cancellation safety of `Timer::after_secs`,
+            // however the implementation is comparable to `Ticker::next` which is documented as being cancel safe.
+            // Therefore, we assume cancellation safety here.
+            match select(&mut wait_for_detected_gesture, Timer::after_secs(1)).await {
+                // A gesture was detected before one second had passed so "reset" the timeout
+                Either::First(()) => continue,
+                Either::Second(()) => {
+                    // Timeout expired, so we can safely wait for the next gesture and then act accordingly.
+                    wait_for_detected_gesture.await;
+                    break;
+                }
+            }
+        }
     }
 }
