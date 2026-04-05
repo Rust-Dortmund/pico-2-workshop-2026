@@ -35,6 +35,11 @@ where
     pub(crate) async fn run(mut self) -> Result<(), Led::Error> {
         let mut ticker = Ticker::every(Duration::from_millis(500));
         loop {
+            // CANCELLATION SAFETY:
+            // - `embassy_sync::watch::Receiver::changed` is not documented as being cancel safe, but
+            //   should be according to [this comment](https://github.com/embassy-rs/embassy/issues/5484#issuecomment-3921041927).
+            //   Also see [this issue](https://github.com/embassy-rs/embassy/issues/5796).
+            // - `embassy_time::Ticker::next` is cancel safe.
             match select(self.receiver.changed(), ticker.next()).await {
                 Either::First(new_color) => self.led.set_color(new_color).await?,
                 Either::Second(()) => self.led.toggle().await?,
