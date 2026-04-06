@@ -30,7 +30,7 @@ Embassy is a task framework for embedded Rust, which essentially means that it a
 This is useful if, for example, you want to regularly update some output value (say, the color of an LED), but at the same time you want to check or wait for a new input value (e.g., a new sensor reading or an API request).
 
 The provided code skeletons will help you along with how embassy works, but for more concrete hardware interactions (like turning on the LED) you will need to look at the documentation for the relevant types from [`embassy-rp`](https://docs.rs/embassy-rp/latest/embassy_rp/index.html).
-If you prefer to get a little bit of a head start upfront, there is a recording of a Rust Dortmund meetup talk about embassy that you can find at [TODO]().
+If you prefer to get a little bit of a head start upfront, there is a recording of a Rust Dortmund meetup talk about embassy that you can find [here](https://www.youtube.com/watch?v=zsanJhEiiCE).
 
 ## Working with a Breadboard
 
