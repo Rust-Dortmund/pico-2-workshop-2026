@@ -46,7 +46,7 @@ Additionally, all pins within the same half of each numbered row are connected, 
 <img alt="Breadboard Internals" src="Breadboard.png" width="75%" />
 
 Breadboard Internals.
-By <a href="//commons.wikimedia.org/w/index.php?title=User:Guhuru&amp;action=edit&amp;redlink=1" class="new" title="User:Guhuru (page does not exist)">Guhuru</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="http://creativecommons.org/publicdomain/zero/1.0/deed.en" title="Creative Commons Zero, Public Domain Dedication">CC0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=97240411">Link</a>
+By <a href="https://commons.wikimedia.org/w/index.php?title=User:Guhuru" class="new" title="User:Guhuru (page does not exist)">Guhuru</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="http://creativecommons.org/publicdomain/zero/1.0/deed.en" title="Creative Commons Zero, Public Domain Dedication">CC0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=97240411">Link</a>
 
 </div>
 
