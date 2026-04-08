@@ -44,7 +44,8 @@ The transmission ends if SDA changes from low to high _during_ a transmission wi
 
 <img alt="Timing diagram of an I2C bus transmission" src="I2C_data_transfer.svg.png" width="75%" style="background: white" />
 
-Timing diagram of an I2C bus transmission
+Timing diagram of an I2C bus transmission.
+By <a href="https://commons.wikimedia.org/wiki/User:Mfloryan" class="new" title="User:Mfloryan">Marcin Floryan</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="http://creativecommons.org/publicdomain/zero/1.0/deed.en" title="Creative Commons Zero, Public Domain Dedication">CC0</a>, <a href="https://commons.wikimedia.org/wiki/File:I2C_data_transfer.svg">Link</a>
 
 </div>
 
