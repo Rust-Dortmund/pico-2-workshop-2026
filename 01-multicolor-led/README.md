@@ -31,7 +31,7 @@ This is illustrated on the following diagram:
 
 <div align="center">
 
-<img alt="Physical LED pins" src="Pins_LED.png" width="30%" />
+<img alt="Physical LED pins" src="Pins_LED.png" width="10%" />
 
 </div>
 
