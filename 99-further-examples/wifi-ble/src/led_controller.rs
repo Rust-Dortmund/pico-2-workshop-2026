@@ -65,9 +65,9 @@ pub(crate) type LedControllerRunner = Runner<
 /// - A runner that needs to be polled (e.g. given to a task) in order for the LED controller to run.
 /// - A [`Watch`] for passing the color to display to the LED controller.
 pub(crate) fn initialize(
-    red_gpio: Peri<'static, PIN_19>,
-    green_gpio: Peri<'static, PIN_20>,
-    blue_gpio: Peri<'static, PIN_18>,
+    red_gpio: Peri<'static, PIN_18>,
+    green_gpio: Peri<'static, PIN_19>,
+    blue_gpio: Peri<'static, PIN_20>,
 ) -> (LedControllerRunner, &'static ColorWatch<2>) {
     let red_pin = Output::new(red_gpio, Level::Low);
     let green_pin = Output::new(green_gpio, Level::Low);

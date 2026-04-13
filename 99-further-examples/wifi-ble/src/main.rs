@@ -159,7 +159,7 @@ async fn main(spawner: Spawner) {
         DMA_CH0,
     );
 
-    let (led_controller_runner, watch) = led_controller::initialize(PIN_19, PIN_20, PIN_18);
+    let (led_controller_runner, watch) = led_controller::initialize(PIN_18, PIN_19, PIN_20);
 
     info!("Initializing CYW43");
 

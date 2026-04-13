@@ -170,7 +170,7 @@ async fn main(spawner: Spawner) {
 
     // Now our tasks:
     info!("Initializing LED controller");
-    let (led_controller_runner, watch) = led_controller::initialize(PIN_19, PIN_20, PIN_18);
+    let (led_controller_runner, watch) = led_controller::initialize(PIN_18, PIN_19, PIN_20);
 
     info!("Initializing web server");
     let mut webserver_task_factory = webserver::initialize(network_stack, watch.sender());
