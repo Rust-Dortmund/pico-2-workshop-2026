@@ -24,9 +24,9 @@ async fn main(_spawner: Spawner) {
     } = embassy_rp::init(Default::default());
 
     // Set all pins to low initially.
-    let mut output_red = Output::new(PIN_19, Level::Low);
-    let mut output_green = Output::new(PIN_20, Level::Low);
-    let mut output_blue = Output::new(PIN_18, Level::Low);
+    let mut output_red = Output::new(PIN_18, Level::Low);
+    let mut output_green = Output::new(PIN_19, Level::Low);
+    let mut output_blue = Output::new(PIN_20, Level::Low);
 
     // Change LED color every half a second.
     let mut ticker = Ticker::every(Duration::from_millis(500));

@@ -34,9 +34,9 @@ async fn main(_spawner: Spawner) {
 
     // Set all pins to low initially.
     // We don't need the blue pin for the traffic light, so just make sure to turn it off initially.
-    let mut output_red = Output::new(PIN_19, Level::Low);
-    let mut output_green = Output::new(PIN_20, Level::Low);
-    let _output_blue = Output::new(PIN_18, Level::Low); 
+    let mut output_red = Output::new(PIN_18, Level::Low);
+    let mut output_green = Output::new(PIN_19, Level::Low);
+    let _output_blue = Output::new(PIN_20, Level::Low); 
 
     // Instantiate the I2C bus with the correct pins.
     let sda = PIN_14;

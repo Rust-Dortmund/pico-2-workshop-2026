@@ -25,7 +25,7 @@ As a schematic, the LED looks like this:
 There is one pin per channel, plus a shared pin for connecting back to ground / 0V (this is taken from the [LED's datasheet](https://www.inolux-corp.com/datasheet/Inolux%20Lamp/TH%20Lamp/HV-5RGBXX%205mm%20Full-Color%20Series.pdf), which you can also find in the [`datasheets`](../datasheets) folder in this repository).
 We'll wire one output pin of the Pico 2 to each channel with a resistor in between to protect the LED and wire up the LED's ground pin to connect to a Pico 2 pin that exposes the Pico's ground so both parts agree on what 0V means exactly.
 
-Note how the pins / channels of the LED are numbered: pin 1 is green, 2 is red, 3 is ground and 4 is blue.
+Note how the pins / channels of the LED are numbered: pin 1 is blue, 2 is green, 3 is ground and 4 is red.
 You can check that you've got the LED the right way round by looking at the bottom end of the pins: pin 3 is longest, while pin 4 is shortest.
 This is illustrated on the following diagram:
 
@@ -52,7 +52,7 @@ The following image shows how to wire up the LED and resistors.
 
 </div>
 
-We're using GPIO pins 18 to 20 for the blue, red and green channel (respectively) and the pin right below them should be labelled ground in the pinout.
+We're using GPIO pins 18 to 20 for the red, green and blue channel (respectively) and the pin right below them should be labelled ground in the pinout.
 If you position the Pico 2 right at the top of the breadboard, you can match the pin numbers against the row numbers on the left-hand side of the board.
 
 > [!IMPORTANT]
