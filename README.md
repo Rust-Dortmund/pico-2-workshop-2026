@@ -21,6 +21,7 @@ Note that the example solutions are separate crates and can't be run as a `cargo
 - You will connect to the hardware over two USB-A cables. If your laptop doesn't have 2 USB-A ports, you might need to bring additional adapters.
   - One of the USBs is only for providing power to the microcontroller. You may substitute power from your laptop by bringing a phone charger with a USB-A socket.
   - The other cable is used to program the microcontroller and definitely needs to go into your laptop. If your laptop doesn't have USB-A ports at all, please bring a matching adapter (e.g., to USB-C if that's what your laptop has).
+- Clone this repo - this **requires [downloading and installing `git lfs`](https://git-lfs.com/) beforehand**
 - Follow as much of the setup instructions under [`00-setup`](00-setup/README.md) as you want that don't yet require course hardware to prepare.
 
 ## Embassy
