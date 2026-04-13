@@ -36,7 +36,7 @@ We will use a tool called `probe-rs` to connect to the Pico 2 and flash it with 
 You can download the latest release [from GitHub](https://github.com/probe-rs/probe-rs/releases/tag/v0.30.0) or build it from source using
 
 ```shell
-cargo install probe-rs-tools@0.30 --locked
+cargo install probe-rs-tools@0.30.0 --locked
 ```
 
 (Note that this will install the latest version at the time of preparing the workshop. If you are reading this far into the future, use a newer version at your own risk.)
