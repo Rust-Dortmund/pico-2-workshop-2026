@@ -80,6 +80,27 @@
             -o-transition: all 0.5s ease-in-out;
             transition: all 0.5s ease-in-out;
         }
+
+        .two-col {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .two-col td {
+            width: 50%;
+            vertical-align: top;
+        }
+
+        table,
+        th,
+        td {
+            border: none;
+        }
+
+        .reveal table th,
+        .reveal table td {
+            border: none !important;
+        }
     </style>
 </head>
 
@@ -194,11 +215,52 @@
                     </textarea>
                 </section>
                 <section>
+                    <table class="two-col">
+                        <tr>
+                            <td>
+                                <div style="display: flex; justify-content: center; align-items: center;">
+                                    <p style="text-align: center;">Instructions and Materials:</p>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; justify-content: center; align-items: center;">
+                                    <p style="text-align: center;">WiFi:</p>
+                                </div>
+                            </td>
+                        </tr>
 
-                    <p>Instructions and Materials:</p>
-                    <img src="static/Workshop_QR.gif" width="30%" style="margin: 5px; border: 1px solid black; border-radius: 10px;" />
-                    <p style="font-size: large;"><code>https://github.com/Rust-Dortmund/pico-2-workshop-2026/</code></p>
-                    <p style="font-size: large;"><br>Cloning this repo requires <a href="https://git-lfs.com/">downloading and installing <code>git lfs</code></a></p>
+                        <tr>
+                            <td>
+                                <div style="display: flex; justify-content: center; align-items: center;">
+                                    <!--qrencode -o intro-slides/static/Workshop_QR.svg -t SVG --svg-path "https://github.com/Rust-Dortmund/pico-2-workshop-2026/"-->
+                                    <img src="static/Workshop_QR.svg" width="30%"
+                                        style="margin: 5px; border: 1px solid black; border-radius: 10px;" />
+                                </div>
+                                <div style="display: flex; justify-content: center; align-items: center;">
+                                    <p style="font-size: large; text-align: center;">
+                                        <code>https://github.com/Rust-Dortmund/pico-2-workshop-2026/</code>
+                                    </p>
+                                </div>
+                                <div style="display: flex; justify-content: center; align-items: center;">
+                                    <p style="font-size: large; text-align: center;"><br>Cloning this repo requires
+                                        downloading and installing
+                                        <a href="https://git-lfs.com/"><code>git lfs</code></a>
+                                    </p>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; justify-content: center; align-items: center;">
+                                    <!--qrencode -o intro-slides/static/WiFi_QR.svg -t SVG --svg-path "WIFI:T:WPA;S:epNEO_Guest;P:aCkU%0S1gcA8uX;;"-->
+                                    <img src="static/WiFi_QR.svg" width="30%"
+                                        style="margin: 5px; border: 1px solid black; border-radius: 10px;" />
+                                </div>
+
+                                <div style="display: flex; justify-content: center; align-items: center;">
+                                    <p style="font-size: large;">SSID: epNEO_Guest<br>Password: aCkU%0S1gcA8uX</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
                 </section>
             </section>
         </div>
