@@ -9,7 +9,7 @@ We need a sensor!
 The APDS-9960 sensor, to be exact.
 
 The APDS-9960 is a light sensor that can detect color and motion.
-It was used in some of Samsung's S-series phones to do things like figure out if you're holding the phone to your ear and it's worth looking through [the sensor's full datasheet](../datasheets/apds9960.pdf) again after the workshop to find inspiration for what else you can do with the hardware you'll be taking home.
+It was used in some of Samsung's S-series phones to do things like figure out if you're holding the phone to your ear and it's worth looking through [the sensor's full datasheet](../datasheets/APDS-9960.md) again after the workshop to find inspiration for what else you can do with the hardware you'll be taking home.
 
 For today, we'll only make use of the sensor's proximity function, which measures the approximate distance of the closest object to the sensor by shooting light at it and measuring if any of it comes back.
 The proximity is reported as a value between 0 and 255 (i.e., a `u8`) whose exact interpretation depends on how the sensor was configured (e.g., how much light is emitted to check for reflections) and the composition of the object whose distance is measured (in particular, how much light the object reflects).
@@ -145,7 +145,8 @@ You'll have to pass the correct peripheral again, as well as the SCL and SDA pin
 
 Now it's time to connect the actual sensor!
 Create an instance of the `Apds9960` driver and use it to initialize the connected sensor.
-You can find the documentation of the `apds9960` crate [here](TODO: link APDS docs).
+You can find the documentation of the `apds9960` crate [here](https://bjoernlange.github.io/apds9960-rs).
+Note that we use a fork with `async` support and that it is not the same crate as found on crates.io!
 
 <details>
 
