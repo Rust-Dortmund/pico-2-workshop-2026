@@ -22,7 +22,7 @@ As a schematic, the LED looks like this:
 
 </div>
 
-There is one pin per channel, plus a shared pin for connecting back to ground / 0V (this is taken from the [LED's datasheet](https://www.inolux-corp.com/datasheet/Inolux%20Lamp/TH%20Lamp/HV-5RGBXX%205mm%20Full-Color%20Series.pdf), which you can also find in the [`datasheets`](../datasheets) folder in this repository).
+There is one pin per channel, plus a shared pin for connecting back to ground / 0V.
 We'll wire one output pin of the Pico 2 to each channel with a resistor in between to protect the LED and wire up the LED's ground pin to connect to a Pico 2 pin that exposes the Pico's ground so both parts agree on what 0V means exactly.
 
 Note how the pins / channels of the LED are numbered: pin 1 is blue, 2 is green, 3 is ground and 4 is red.
