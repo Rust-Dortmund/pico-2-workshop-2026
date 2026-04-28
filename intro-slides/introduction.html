@@ -133,13 +133,10 @@
                         <div class="r-stack r-stretch" style="justify-content: center;">
                             <img src="static/rp2350.png" alt="RP2350" style="margin: 0; padding: 0;" />
                             <img class="fragment current-visible" data-fragment-index="1" src="static/rp2350_proc.png" alt="RP2350" style="margin: 0; padding: 0;" />
-                            <img class="fragment current-visible" data-fragment-index="2" src="static/rp2350_clock.png" alt="RP2350" style="margin: 0; padding: 0;" />
-                            <img class="fragment current-visible" data-fragment-index="3" src="static/rp2350_memory.png" alt="RP2350" style="margin: 0; padding: 0;" />
-                            <img class="fragment current-visible" data-fragment-index="4" src="static/rp2350_gpio.png" alt="RP2350" style="margin: 0; padding: 0;" />
-                            <img class="fragment current-visible" data-fragment-index="5" src="static/rp2350_peripherals.png" alt="RP2350" style="margin: 0; padding: 0;" />
-                            <img class="fragment current-visible" data-fragment-index="6" src="static/rp2350_serial.png" alt="RP2350" style="margin: 0; padding: 0;" />
-                            <img class="fragment current-visible" data-fragment-index="7" src="static/rp2350_adc.png" alt="RP2350" style="margin: 0; padding: 0;" />
-                            <img class="fragment fade-in" data-fragment-index="8" src="static/rp2350_watchdog.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment current-visible" data-fragment-index="2" src="static/rp2350_memory.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment current-visible" data-fragment-index="3" src="static/rp2350_gpio.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment current-visible" data-fragment-index="4" src="static/rp2350_peripherals.png" alt="RP2350" style="margin: 0; padding: 0;" />
+                            <img class="fragment current-visible" data-fragment-index="5" src="static/rp2350_serial.png" alt="RP2350" style="margin: 0; padding: 0;" />
                         </div>
 
                         <p style="font-size: large; margin: 0; padding: 0;"><it>
@@ -147,27 +144,22 @@
                         </it></p>
 
                         Notes:
-                        - The RP2350 contains (non-exhaustive):
-                          - two independent Cortex-M33 processors (top right, which in turn contain all of the circuitery discussed before. Note that this means that the RP2350 can do multithreading),
-                          - a hardware clock (top left),
-                          - \[a direct memory access (DMA) controller (top right),\]
-                          - a bunch of memory (bottom right), including
-                            - the boot ROM, which contains the microcontroller version of your computer's BIOS,
-                            - 520 kB of RAM that you can use in your program, and 
-                            - some read-only memory with things like a unique serial number,
-                          - two banks of general-purpose IO (GPIO) pins (left) that you can use to connect to other chips, and
-                          - a bunch of smaller processors called "peripherals" (middle left), which help you with various things like
-                            - communicating over GPIO (implementing serial protocols like I2C, SPI, or UART),
-                            - modulating and converting inputs / outputs (e.g. measuring analog voltages or temperatures), or
-                            - making sure your code doesn't get stuck (watchdog).
-
+                        - Most of this we don't care about for today, so here's the quick rundown of what you need to now: We have 
+                          - two processor cores, of which we will only be using one today,
+                          - a bunch of memory (in the bottom right) where you will be flashing your program to so it runs on the microcontroller,
+                          - some GPIO pins that we'll be plugging other stuff into, and
+                          - a bunch of smaller processors called "peripherals", of which we mostly care about the I2C bus peripheral today, which is an embedded communication channel (much like TCP for the web, but more... well, embedded).
                         
                         ---
 
                         <!-- .slide: data-transition="none" -->
                         ### Working with `#[no_std]`
 
-                        <img class="r-stretch" src="static/tiered_std.png" alt="Tiered STD" style="margin: 0; padding: 0;" />
+                        <div class="svg-stack">
+                            <img class="r-stretch" src="static/tiered-std-embassy-step1.svg" alt="Tiered STD" style="margin: 0; padding: 0;"/>
+                            <img class="r-stretch fragment" src="static/tiered-std-embassy-step2.svg" alt="Tiered STD" style="margin: 0; padding: 0;" data-fragment-index="1"/>
+                            <img class="r-stretch fragment" src="static/tiered-std-embassy-step3.svg" alt="Tiered STD" style="margin: 0; padding: 0;" data-fragment-index="2"/>
+                        </div>
                         
                         <p style="font-size: large; margin: 0; padding: 0;"><it>
                         Based on <a href="https://google.github.io/comprehensive-rust/bare-metal/no_std.html">Comprehensive Rust</a>
@@ -177,7 +169,6 @@
                         - `HashMap` depends on RNG.
                         - `std` re-exports the contents of both `core` and `alloc`.
 
-                    
                         ---
 
                         #### The Embedded Rust Abstraction Hierarchy
@@ -200,11 +191,11 @@
                             <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step1.svg" class="fragment" data-fragment-index="0">
                             <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step2.svg" class="fragment" data-fragment-index="1">
                             <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step3.svg" class="fragment" data-fragment-index="2">
-                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step4.svg" class="fragment" data-fragment-index="3">
-                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step5.svg" class="fragment" data-fragment-index="4">
-                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step6.svg" class="fragment" data-fragment-index="5">
-                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step7.svg" class="fragment" data-fragment-index="6">
-                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step8.svg" class="fragment" data-fragment-index="7">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step4.svg" class="fragment" data-fragment-index="2">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step5.svg" class="fragment" data-fragment-index="3">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step6.svg" class="fragment" data-fragment-index="3">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step7.svg" class="fragment" data-fragment-index="4">
+                            <img style="height: 100%; width: auto; max-width: 100%;" src="static/embassy-overview-step8.svg" class="fragment" data-fragment-index="5">
                         </div>
 
                         Notes:
@@ -215,52 +206,35 @@
                     </textarea>
                 </section>
                 <section>
-                    <table class="two-col">
-                        <tr>
-                            <td>
-                                <div style="display: flex; justify-content: center; align-items: center;">
-                                    <p style="text-align: center;">Instructions and Materials:</p>
-                                </div>
-                            </td>
-                            <td>
-                                <div style="display: flex; justify-content: center; align-items: center;">
-                                    <p style="text-align: center;">WiFi:</p>
-                                </div>
-                            </td>
-                        </tr>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <p style="text-align: center;">WiFi:</p>
+                    </div>
 
-                        <tr>
-                            <td>
-                                <div style="display: flex; justify-content: center; align-items: center;">
-                                    <!--qrencode -o intro-slides/static/Workshop_QR.svg -t SVG --svg-path "https://github.com/Rust-Dortmund/pico-2-workshop-2026/"-->
-                                    <img src="static/Workshop_QR.svg" width="30%"
-                                        style="margin: 5px; border: 1px solid black; border-radius: 10px;" />
-                                </div>
-                                <div style="display: flex; justify-content: center; align-items: center;">
-                                    <p style="font-size: large; text-align: center;">
-                                        <code>https://github.com/Rust-Dortmund/pico-2-workshop-2026/</code>
-                                    </p>
-                                </div>
-                                <div style="display: flex; justify-content: center; align-items: center;">
-                                    <p style="font-size: large; text-align: center;"><br>Cloning this repo requires
-                                        downloading and installing
-                                        <a href="https://git-lfs.com/"><code>git lfs</code></a>
-                                    </p>
-                                </div>
-                            </td>
-                            <td>
-                                <div style="display: flex; justify-content: center; align-items: center;">
-                                    <!--qrencode -o intro-slides/static/WiFi_QR.svg -t SVG --svg-path "WIFI:T:WPA;S:epNEO_Guest;P:aCkU%0S1gcA8uX;;"-->
-                                    <img src="static/WiFi_QR.svg" width="30%"
-                                        style="margin: 5px; border: 1px solid black; border-radius: 10px;" />
-                                </div>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <!--qrencode -o intro-slides/static/WiFi_QR.svg -t SVG --svg-path "WIFI:T:WPA;S:epNEO_Guest;P:aCkU%0S1gcA8uX;;"-->
+                        <img src="static/WiFi_QR.svg" width="30%"
+                            style="margin: 5px; border: 1px solid black; border-radius: 10px;" />
+                    </div>
 
-                                <div style="display: flex; justify-content: center; align-items: center;">
-                                    <p style="font-size: large;">SSID: epNEO_Guest<br>Password: aCkU%0S1gcA8uX</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <p style="font-size: large;">SSID: epNEO_Guest<br>Password: aCkU%0S1gcA8uX</p>
+                    </div>
+                </section>
+                <section>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <p style="text-align: center;">Instructions and Materials:</p>
+                    </div>
+
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <!--qrencode -o intro-slides/static/Workshop_QR.svg -t SVG --svg-path "https://github.com/Rust-Dortmund/pico-2-workshop-2026/"-->
+                        <img src="static/Workshop_QR.svg" width="30%"
+                            style="margin: 5px; border: 1px solid black; border-radius: 10px;" />
+                    </div>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <p style="font-size: large; text-align: center;">
+                            <code>https://github.com/Rust-Dortmund/pico-2-workshop-2026/</code>
+                        </p>
+                    </div>
                 </section>
             </section>
         </div>
