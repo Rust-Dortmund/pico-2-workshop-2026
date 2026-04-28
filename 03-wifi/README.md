@@ -15,6 +15,11 @@ If you're reading this, you're probably already connected to a WiFi network with
 You'll need to provide the name of the WiFi network (its SSID) and the WiFi password as environment variables when compiling the program so the Pico 2 will be able to connect to it.
 To do so, please export the WiFi name as `SSID` and the WiFi password as `PASSWORD`.
 
+> [!NOTE]
+> The workshop WiFi requires to accept the terms and conditions of use which is not possible with the Pico 2.
+> Use your phone to open a WiFi hotspot instead.
+> Also note that the WiFi chip of the Pico 2 is only able to operate on 2.4 GHz, so make sure to enable this channel for the hotspot.
+
 ## Wiring
 
 _There are no wiring changes for this exercise._
