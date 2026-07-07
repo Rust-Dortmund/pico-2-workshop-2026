@@ -14,16 +14,16 @@ use crate::{
     led_controller::LedControllerRunner,
     webserver::WebserverRunner,
 };
-use cyw43::{JoinOptions, NetDriver, bluetooth::BtDriver};
+use cyw43::{Cyw43439, JoinOptions, NetDriver, SpiBus, aligned_bytes, bluetooth::BtDriver};
 use cyw43_pio::{PioSpi, RM2_CLOCK_DIVIDER};
 use defmt::*;
 use embassy_executor::Spawner;
 use embassy_net::StackResources;
 use embassy_rp::{
-    Peripherals, bind_interrupts,
+    Peripherals, bind_interrupts, dma,
     clocks::RoscRng,
     gpio::{Level, Output},
-    peripherals::{DMA_CH0, PIO0},
+    peripherals::{DMA_CH0, DMA_CH1, PIO0},
     pio::{InterruptHandler, Pio},
 };
 use embassy_time::{Duration, Timer};
@@ -52,12 +52,19 @@ const NET_STACK_RESOURCES: usize = WEB_TASK_POOL_SIZE + 3;
 bind_interrupts!(struct Irqs {
     // PIO0 is used to emulate the non-standard SPI protocol used by CYW43 (the WiFi / BLE SoC).
     PIO0_IRQ_0 => InterruptHandler<PIO0>;
+    // Embassy git (post-0.10.0): cyw43-pio uses separate TX/RX DMA channels.
+    DMA_IRQ_0 => dma::InterruptHandler<DMA_CH0>, dma::InterruptHandler<DMA_CH1>;
 });
 
 /// Task driving the CYW43 WiFi / BLE SoC.
 #[embassy_executor::task]
 async fn cyw43_task(
-    runner: cyw43::Runner<'static, Output<'static>, PioSpi<'static, PIO0, 0, DMA_CH0>>,
+    // Embassy git (post-0.10.0): `Runner` is generic over the chip type (`Cyw43439` on Pico 2 W).
+    runner: cyw43::Runner<
+        'static,
+        SpiBus<Output<'static>, PioSpi<'static, PIO0, 0>>,
+        Cyw43439,
+    >,
 ) -> ! {
     runner.run().await
 }
@@ -138,16 +145,19 @@ async fn main(spawner: Spawner) {
         PIN_29,
         PIO0,
         DMA_CH0,
+        DMA_CH1,
         ..
     } = embassy_rp::init(Default::default());
     let mut rng = RoscRng;
-    let cyw43_firmware = include_bytes!("../../../cyw43-firmware/43439A0.bin");
-    let cyw43_clm = include_bytes!("../../../cyw43-firmware/43439A0_clm.bin");
-    let cyw43_bluetooth_firmware = include_bytes!("../../../cyw43-firmware/43439A0_btfw.bin");
+    let fw = aligned_bytes!("../../../cyw43-firmware/43439A0.bin");
+    let clm = aligned_bytes!("../../../cyw43-firmware/43439A0_clm.bin");
+    let btfw = aligned_bytes!("../../../cyw43-firmware/43439A0_btfw.bin");
+    let nvram = aligned_bytes!("../../../cyw43-firmware/nvram_rp2040.bin");
 
     let cyw43_power = Output::new(PIN_23, Level::Low);
     let cyw43_chip_select = Output::new(PIN_25, Level::High);
     let mut pio = Pio::new(PIO0, Irqs);
+    // Embassy git (post-0.10.0): `PioSpi` uses separate TX and RX DMA channels.
     let spi = PioSpi::new(
         &mut pio.common,
         pio.sm0,
@@ -156,7 +166,8 @@ async fn main(spawner: Spawner) {
         cyw43_chip_select,
         PIN_24,
         PIN_29,
-        DMA_CH0,
+        dma::Channel::new(DMA_CH0, Irqs),
+        dma::Channel::new(DMA_CH1, Irqs),
     );
 
     let (led_controller_runner, watch) = led_controller::initialize(PIN_18, PIN_19, PIN_20);
@@ -165,21 +176,15 @@ async fn main(spawner: Spawner) {
 
     static STATE: StaticCell<cyw43::State> = StaticCell::new();
     let state = STATE.init(cyw43::State::new());
-    let (network_device, bluetooth_driver, mut control, runner) = cyw43::new_with_bluetooth(
-        state,
-        cyw43_power,
-        spi,
-        cyw43_firmware,
-        cyw43_bluetooth_firmware,
-    )
-    .await;
+    let (network_device, bluetooth_driver, mut control, runner) =
+        cyw43::new_with_bluetooth(state, cyw43_power, spi, fw, btfw, nvram).await;
 
     // The CYW43 must be operable when we create the network stack, so we have to spawn its task before doing so.
     info!("Spawning CYW43 task");
-    spawner.must_spawn(cyw43_task(runner));
+    spawner.spawn(unwrap!(cyw43_task(runner)));
     info!("Spawned CYW43 task");
 
-    control.init(cyw43_clm).await;
+    control.init(clm).await;
     control
         .set_power_management(cyw43::PowerManagementMode::PowerSave)
         .await;
@@ -213,17 +218,17 @@ async fn main(spawner: Spawner) {
 
     info!("Spawning tasks");
 
-    spawner.must_spawn(run_led_controller(led_controller_runner));
-    spawner.must_spawn(run_network(network_runner));
-    spawner.must_spawn(run_print_ip(print_ip_runner));
+    spawner.spawn(unwrap!(run_led_controller(led_controller_runner)));
+    spawner.spawn(unwrap!(run_network(network_runner)));
+    spawner.spawn(unwrap!(run_print_ip(print_ip_runner)));
 
     // Note that we are running multiple tasks for handling requests to the webserver!
     for _ in 0..WEB_TASK_POOL_SIZE {
-        spawner.must_spawn(run_webserver(webserver_task_factory.new_runner()));
+        spawner.spawn(unwrap!(run_webserver(webserver_task_factory.new_runner())));
     }
 
-    spawner.must_spawn(run_ble(ble_runner));
-    spawner.must_spawn(run_ble_connection(ble_connection_runner));
+    spawner.spawn(unwrap!(run_ble(ble_runner)));
+    spawner.spawn(unwrap!(run_ble_connection(ble_connection_runner)));
 
     info!("Tasks spawned");
 

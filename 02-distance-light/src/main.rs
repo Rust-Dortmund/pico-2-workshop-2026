@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+#![allow(dead_code, unused_variables)]
 
 use defmt::*;
 use embassy_executor::Spawner;
