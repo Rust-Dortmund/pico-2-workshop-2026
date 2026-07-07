@@ -6,12 +6,16 @@ use embassy_executor::Spawner;
 use embassy_rp::{
     Peripherals,
     gpio::{Level, Output},
-    i2c::InterruptHandler, peripherals::I2C1,
+    i2c::InterruptHandler,
+    peripherals::I2C1,
 };
 use embassy_time::{Duration, Instant};
 use {defmt_rtt as _, panic_probe as _};
 
-type Apds9960 = apds9960::Apds9960<embassy_rp::i2c::I2c<'static, I2C1, embassy_rp::i2c::Async>, apds9960::Async>;
+type Apds9960 = apds9960::Apds9960<
+    embassy_rp::i2c::I2c<'static, I2C1, embassy_rp::i2c::Async>,
+    apds9960::Async,
+>;
 
 // Program metadata for `picotool info`.
 // This isn't needed, but it's recomended to have these minimal entries.

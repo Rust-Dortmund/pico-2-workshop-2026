@@ -4,18 +4,18 @@ name = "rp2350-wifi-ble-controlled-led"
 version = "0.1.0"
 
 [dependencies]
-embassy-executor = { version = "0.9.0", features = ["arch-cortex-m", "executor-thread", "executor-interrupt", "defmt"] }
+embassy-executor = { version = "0.10.0", features = ["platform-cortex-m", "executor-thread", "executor-interrupt", "defmt"] }
 embassy-futures = "0.1.2"
-embassy-net = { version = "0.7.1", features = [ "tcp", "udp", "dhcpv4", "medium-ethernet"] }
-embassy-rp = { version = "0.9.0", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl", "rp235xa", "binary-info"] }
-embassy-sync = { version = "0.7.2", features = ["defmt"] }
-embassy-time = { version = "0.5.0", features = ["defmt", "defmt-timestamp-uptime"] }
+embassy-net = { version = "0.9", features = [ "tcp", "udp", "dhcpv4", "medium-ethernet"] }
+embassy-rp = { version = "0.10.0", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl", "rp235xa", "binary-info"] }
+embassy-sync = { version = "0.8", features = ["defmt"] }
+embassy-time = { version = "0.5.1", features = ["defmt", "defmt-timestamp-uptime"] }
 
 defmt = "1.0.1"
 defmt-rtt = "1.0.0"
 
-cyw43 = { version = "0.6.0", features = ["defmt", "firmware-logs", "bluetooth"] }
-cyw43-pio = { version = "0.9.0", features = ["defmt"] }
+cyw43 = { version = "0.7.0", features = ["defmt", "firmware-logs", "bluetooth"] }
+cyw43-pio = { version = "0.10.0", features = ["defmt"] }
 
 cortex-m = { version = "0.7.6", features = ["inline-asm"] }
 cortex-m-rt = "0.7.0"
@@ -27,9 +27,26 @@ embedded-hal-async = "1"
 
 static_cell = "2"
 
-picoserve = { version = "0.17.1", features = ["embassy"] }
+picoserve = { version = "0.18.0", features = ["embassy"] }
 
-trouble-host = { version = "0.5.1", features = ["peripheral", "gatt", "derive", "defmt"] }
+trouble-host = { version = "0.7", features = ["peripheral", "gatt", "derive", "defmt"] }
+
+# Published cyw43 0.7.0 uses bt-hci 0.8; trouble-host 0.7 needs bt-hci 0.9 (on Embassy main).
+# Patch the Embassy stack from one git rev so path deps unify (avoids embassy-time-driver conflicts).
+# Pin: https://github.com/embassy-rs/embassy/commit/c708723686ce80f83c80b059f04446c732db7272
+[patch.crates-io]
+cyw43 = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+cyw43-pio = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+embassy-futures = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+embassy-net = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+embassy-net-driver = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+embassy-net-driver-channel = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+embassy-rp = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+embassy-sync = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+embassy-time-driver = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+embassy-embedded-hal = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
 
 [profile.release]
 codegen-units = 1

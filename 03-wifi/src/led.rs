@@ -3,7 +3,7 @@
 use core::{fmt::Display, str::FromStr};
 
 use defmt::Format;
-use embassy_rp::gpio::{ Level, Output };
+use embassy_rp::gpio::{Level, Output};
 
 /// A wrapper around the three individual LED colors to control them as one.
 pub(crate) struct TriColorLed {
@@ -15,7 +15,11 @@ pub(crate) struct TriColorLed {
 }
 
 impl TriColorLed {
-    pub(crate) fn new(red_led: Output<'static>, green_led: Output<'static>, blue_led: Output<'static>) -> Self {
+    pub(crate) fn new(
+        red_led: Output<'static>,
+        green_led: Output<'static>,
+        blue_led: Output<'static>,
+    ) -> Self {
         Self {
             red_led,
             green_led,

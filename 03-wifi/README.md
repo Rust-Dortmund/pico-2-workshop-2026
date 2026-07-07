@@ -5,8 +5,10 @@ At the end of the exercise, you will be able to send a POST request from your la
 
 ## Nightly Rust
 
-We'll be using the [`picoserve` crate](https://docs.rs/picoserve/0.17.1/picoserve/) to implement a tiny web server on the Pico 2.
-Since `picoserve` uses one particular unstable Rust feature, you'll need to use a nightly Rust compiler for this exercise.
+We'll be using the [`picoserve` crate](https://docs.rs/picoserve/0.18.0/picoserve/) to implement a tiny web server on the Pico 2.
+Since `picoserve` uses **impl trait in associated types (ITAIT)** - for example `type PathRouter = impl PathRouter<State>` in our `AppWithStateBuilder` - you'll need a nightly Rust compiler for this exercise.
+(RPITIT, the related feature for return-position `impl Trait` in traits, was stabilized in Rust 1.75; ITAIT is still unstable.)
+
 We've pre-configured a known working compiler in the `rust-toolchain.toml` file, so no action is needed on your part - `cargo` should automatically notice if you're missing the required toolchain and download it for you.
 
 ## WiFi Credentials
@@ -58,7 +60,7 @@ Complete the `run` method of the `WebserverRunner` by creating a `picoserve::Ser
 
 <summary>Hint</summary>
 
-Hint: you can use [`AppRouter::shared`](https://docs.rs/picoserve/0.17.1/picoserve/type.AppRouter.html#method.shared) to go from a reference to a router to an owned router type. Make sure you also pass the `AppState` so the server has access to the color value channel.
+Hint: you can use [`AppRouter::shared`](https://docs.rs/picoserve/0.18.0/picoserve/type.AppRouter.html#method.shared) to go from a reference to a router to an owned router type. Make sure you also pass the `AppState` so the server has access to the color value channel.
 
 </details>
 

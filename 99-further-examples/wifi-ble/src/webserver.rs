@@ -56,7 +56,7 @@ pub(crate) struct WebserverRunner {
     id: usize,
     stack: embassy_net::Stack<'static>,
     app: &'static AppRouter<AppProps>,
-    config: &'static picoserve::Config<Duration>,
+    config: &'static picoserve::Config,
     state: AppState,
 }
 
@@ -80,7 +80,7 @@ pub(crate) struct WebserverRunnerFactory {
     next_id: usize,
     stack: embassy_net::Stack<'static>,
     app: &'static AppRouter<AppProps>,
-    config: &'static picoserve::Config<Duration>,
+    config: &'static picoserve::Config,
     state: AppState,
 }
 
@@ -105,16 +105,16 @@ pub(crate) fn initialize(
     stack: embassy_net::Stack<'static>,
     sender: ColorSender<2>,
 ) -> WebserverRunnerFactory {
-    let state = AppState {sender};
+    let state = AppState { sender };
     let app = make_static!(AppRouter<AppProps>, AppProps.build_app());
 
     let config = make_static!(
-        picoserve::Config::<Duration>,
+        picoserve::Config,
         picoserve::Config::new(picoserve::Timeouts {
-            start_read_request: Some(Duration::from_secs(5)),
-            persistent_start_read_request: Some(Duration::from_secs(1)),
-            read_request: Some(Duration::from_secs(1)),
-            write: Some(Duration::from_secs(1)),
+            start_read_request: Duration::from_secs(5),
+            persistent_start_read_request: Duration::from_secs(1),
+            read_request: Duration::from_secs(1),
+            write: Duration::from_secs(1),
         })
         .keep_connection_alive()
     );

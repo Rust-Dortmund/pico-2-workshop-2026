@@ -1,6 +1,5 @@
 #![no_std]
 #![no_main]
-
 // Required for the `picoserve` webserver.
 #![feature(impl_trait_in_assoc_type)]
 
@@ -9,11 +8,8 @@ mod led_controller;
 mod mk_static;
 mod webserver;
 
-use crate::{
-    led_controller::LedControllerRunner,
-    webserver::WebserverRunner,
-};
-use cyw43::{JoinOptions, NetDriver};
+use crate::{led_controller::LedControllerRunner, webserver::WebserverRunner};
+use cyw43::{JoinOptions, NetDriver, SpiBus, aligned_bytes};
 use cyw43_pio::{PioSpi, RM2_CLOCK_DIVIDER};
 use defmt::*;
 use embassy_executor::Spawner;
@@ -21,16 +17,13 @@ use embassy_net::StackResources;
 use embassy_rp::{
     Peripherals, bind_interrupts,
     clocks::RoscRng,
+    dma,
     gpio::{Level, Output},
     peripherals::{DMA_CH0, PIO0},
     pio::{InterruptHandler, Pio},
 };
 use embassy_time::{Duration, Timer};
 use {defmt_rtt as _, panic_probe as _};
-
-// Include the firmware for the WiFi chip.
-const CYW43_FIRMWARE: &[u8; 231_077] = include_bytes!("../../../cyw43-firmware/43439A0.bin");
-const CYW43_CLM: &[u8; 984] = include_bytes!("../../../cyw43-firmware/43439A0_clm.bin");
 
 // Load SSID and WiFi password from environment variables at build time.
 const SSID: &str = env!("SSID");
@@ -40,16 +33,17 @@ const PASSWORD: &str = env!("PASSWORD");
 const WEB_TASK_POOL_SIZE: usize = 8;
 const NET_STACK_RESOURCES: usize = WEB_TASK_POOL_SIZE + 3;
 
-// PIO0 is used to emulate the non-standard SPI protocol used by CYW43 (the WiFi / BLE SoC onboard 
+// PIO0 is used to emulate the non-standard SPI protocol used by CYW43 (the WiFi / BLE SoC onboard
 // the Pico 2).
 bind_interrupts!(struct Irqs {
     PIO0_IRQ_0 => InterruptHandler<PIO0>;
+    DMA_IRQ_0 => dma::InterruptHandler<DMA_CH0>;
 });
 
 /// Task driving the CYW43 WiFi / BLE SoC.
 #[embassy_executor::task]
 async fn cyw43_task(
-    runner: cyw43::Runner<'static, Output<'static>, PioSpi<'static, PIO0, 0, DMA_CH0>>,
+    runner: cyw43::Runner<'static, SpiBus<Output<'static>, PioSpi<'static, PIO0, 0>>>,
 ) -> ! {
     runner.run().await
 }
@@ -74,7 +68,10 @@ impl PrintIpRunner {
         // Now wait for DHCP to happen so the Pico 2 gets assigned an IP.
         info!("Waiting to get IP address...");
         self.network_stack.wait_config_up().await;
-        let config = self.network_stack.config_v4().expect("we can only do V4 and just waited for a config to be available");
+        let config = self
+            .network_stack
+            .config_v4()
+            .expect("we can only do V4 and just waited for a config to be available");
         let address = config.address.address().octets();
         info!(
             "Got IP: {}.{}.{}.{}",
@@ -117,6 +114,10 @@ async fn main(spawner: Spawner) {
         ..
     } = embassy_rp::init(Default::default());
 
+    let fw = aligned_bytes!("../../../cyw43-firmware/43439A0.bin");
+    let clm = aligned_bytes!("../../../cyw43-firmware/43439A0_clm.bin");
+    let nvram = aligned_bytes!("../../../cyw43-firmware/nvram_rp2040.bin");
+
     // Set up communication with the WiFi chip.
     let cyw43_chip_select = Output::new(PIN_25, Level::High);
     let mut pio = Pio::new(PIO0, Irqs);
@@ -128,26 +129,21 @@ async fn main(spawner: Spawner) {
         cyw43_chip_select,
         PIN_24,
         PIN_29,
-        DMA_CH0,
+        dma::Channel::new(DMA_CH0, Irqs),
     );
     info!("Initializing CYW43");
     let state = mk_static!(cyw43::State, cyw43::State::new());
     let cyw43_power = Output::new(PIN_23, Level::Low);
-    let (network_device, mut control, cyw43_runner) = cyw43::new(
-        state,
-        cyw43_power,
-        spi,
-        CYW43_FIRMWARE,
-    )
-    .await;
+    let (network_device, mut control, cyw43_runner) =
+        cyw43::new(state, cyw43_power, spi, fw, nvram).await;
 
-    // The CYW43 must be operable when we create the network stack, so we have to spawn its task 
+    // The CYW43 must be operable when we create the network stack, so we have to spawn its task
     // before doing so.
     info!("Spawning CYW43 task");
-    spawner.must_spawn(cyw43_task(cyw43_runner));
+    spawner.spawn(unwrap!(cyw43_task(cyw43_runner)));
 
     // Continue initializing
-    control.init(CYW43_CLM).await;
+    control.init(clm).await;
     control
         .set_power_management(cyw43::PowerManagementMode::PowerSave)
         .await;
@@ -176,13 +172,13 @@ async fn main(spawner: Spawner) {
     let mut webserver_task_factory = webserver::initialize(network_stack, watch.sender());
 
     info!("Spawning tasks");
-    spawner.must_spawn(run_print_ip(print_ip_runner));
-    spawner.must_spawn(run_led_controller(led_controller_runner));
-    spawner.must_spawn(run_network(network_runner));
+    spawner.spawn(unwrap!(run_print_ip(print_ip_runner)));
+    spawner.spawn(unwrap!(run_led_controller(led_controller_runner)));
+    spawner.spawn(unwrap!(run_network(network_runner)));
 
     // Note that we are running multiple tasks for handling requests to the webserver!
     for _ in 0..WEB_TASK_POOL_SIZE {
-        spawner.must_spawn(run_webserver(webserver_task_factory.new_runner()));
+        spawner.spawn(unwrap!(run_webserver(webserver_task_factory.new_runner())));
     }
     info!("Tasks spawned");
 

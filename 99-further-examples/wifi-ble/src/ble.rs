@@ -43,7 +43,7 @@ struct LedService {
     ///
     /// Again, there is no standard cahracteristic defined, so we use one without a standard meaning.
     #[descriptor(uuid = descriptors::VALID_RANGE, read, value = [0, 2])]
-    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "color", read, value = "LED Color")]
+    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "color", read, value = "LED Color", type = &'static str)]
     #[characteristic(uuid = BluetoothUuid16::new(0x2a57), read, write, notify, value = 0)]
     color: u8,
 }
@@ -69,7 +69,7 @@ impl BleConnectionRunner {
         let len = AdStructure::encode_slice(
             &[
                 AdStructure::Flags(LE_GENERAL_DISCOVERABLE | BR_EDR_NOT_SUPPORTED),
-                AdStructure::ServiceUuids16(&[[0x0a, 0x18]]),
+                AdStructure::CompleteServiceUuids16(&[[0x0a, 0x18]]),
                 AdStructure::CompleteLocalName(name.as_bytes()),
             ],
             &mut advertiser_data[..],
@@ -137,42 +137,37 @@ impl BleConnectionRunner {
         sender: &ColorSender<2>,
     ) {
         if event.handle() == server.led_service.color.handle {
-            // This is for the `color` characteristic.
+            let accepted = event.with_data(|_offset, data| {
+                info!("[gatt] Write Event to Level Characteristic: {:?}", data);
 
-            info!(
-                "[gatt] Write Event to Level Characteristic: {:?}",
-                event.data()
-            );
+                match data {
+                    [COLOR_RED] => {
+                        sender.send(Color::Red);
+                        true
+                    }
+                    [COLOR_GREEN] => {
+                        sender.send(Color::Green);
+                        true
+                    }
+                    [COLOR_BLUE] => {
+                        sender.send(Color::Blue);
+                        true
+                    }
+                    _ => false,
+                }
+            });
 
-            // Decode the payload, notify the LED controller of the new color and respond to the
-            // sender that the request was processed.
-            // Accepting the event will implicitly update the cached value.
-            // Note that sending the color here will implicitly trigger a second notify in [`notify_task`].
-            // We accept this behavior so we don't have to fiddle around with two different
-            // sender / receiver pairs or need a more complicated messaging infrastructure.
-            match *event.data() {
-                [COLOR_RED] => {
-                    sender.send(Color::Red);
-                    // CANCELLATION SAFETY: Documented as being cancel safe.
-                    Self::accept_write_event(event).await;
-                }
-                [COLOR_GREEN] => {
-                    sender.send(Color::Green);
-                    // CANCELLATION SAFETY: Documented as being cancel safe.
-                    Self::accept_write_event(event).await;
-                }
-                [COLOR_BLUE] => {
-                    sender.send(Color::Blue);
-                    // CANCELLATION SAFETY: Documented as being cancel safe.
-                    Self::accept_write_event(event).await;
-                }
-                _ => match event.reject(AttErrorCode::OUT_OF_RANGE) {
+            if accepted {
+                // CANCELLATION SAFETY: Documented as being cancel safe.
+                Self::accept_write_event(event).await;
+            } else {
+                match event.reject(AttErrorCode::OUT_OF_RANGE) {
                     // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
                     Ok(reply) => reply.send().await,
                     Err(e) => {
                         info!("[gatt] error sending response: {:?}", e)
                     }
-                },
+                }
             }
         }
     }
@@ -233,7 +228,7 @@ impl BleConnectionRunner {
             && server
                 .led_service
                 .color
-                .notify(connection, &u8::from(new_color))
+                .notify(connection, &u8::from(new_color), true)
                 .await
                 .is_err()
         {
@@ -250,7 +245,7 @@ impl BleConnectionRunner {
             if server
                 .led_service
                 .color
-                .notify(connection, &new_color)
+                .notify(connection, &new_color, true)
                 .await
                 .is_err()
             {
@@ -301,17 +296,16 @@ pub(crate) fn initialize(
     let ble_controller: ExternalController<_, 10> = ExternalController::new(bluetooth_driver);
 
     let ble_host_resources = mk_static!(
-        HostResources<DefaultPacketPool, 4, 0, 1>,
+        HostResources<ExternalController<BtDriver<'static>, 10>, DefaultPacketPool, 4, 0, 1>,
         HostResources::new()
     );
 
     let stack = mk_static!(
         Stack<'static, ExternalController<BtDriver<'static>, 10>, DefaultPacketPool>,
-        trouble_host::new(ble_controller, ble_host_resources)
+        trouble_host::new(ble_controller, ble_host_resources).build()
     );
-    let Host {
-        peripheral, runner, ..
-    } = stack.build();
+    let runner = stack.runner();
+    let peripheral = stack.peripheral();
 
     let server = Server::new_with_config(GapConfig::Peripheral(PeripheralConfig {
         name: "LED TrouBLE",
