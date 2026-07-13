@@ -24,6 +24,11 @@ Note that the example solutions are separate crates and can't be run as a `cargo
 - Clone this repo 
 - Follow as much of the setup instructions under [`00-setup`](00-setup/README.md) as you want that don't yet require course hardware to prepare.
 
+## Troubleshooting
+
+We've put together some of the more common places where other participants got stuck and what to do if that happens to you at [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+Hopefully, you won't need to, but if you ever feel like something's just not working or if you're facing a problem and all instructors are currently busy, you might want to go and have a look if you can find a solution for your problem in there.
+
 ## Embassy
 
 You will be using the [embassy](https://embassy.dev/) framework to write your programs during this workshop.
