@@ -1,6 +1,6 @@
 [package]
 edition = "2024"
-name = "rp2350-apds9960-nightlight"
+name = "rp2350-apds9960-sun-detector"
 version = "0.1.0"
 
 [dependencies]
