@@ -7,7 +7,7 @@ To do so, you will need to wire up your first, small circuit on the breadboard t
 ## Wiring
 
 The multicolor LED has 3 channels: red, green and blue.
-You can turn each channel on or off individually by connecting it to a GPIO pin of the Pico 2 and setting that pin to "high", which causes current to flow through the LED that will power the selected channel.
+You can turn each channel on or off individually by connecting it to a GPIO pin of the Pico 2 and setting that pin from "low" to "high", which causes current to flow through the LED that will power the selected channel.
 This also means that you can mix colors by giving current to more than one channel simultaneously.
 
 ### LED Background
@@ -22,8 +22,16 @@ As a schematic, the LED looks like this:
 
 </div>
 
-There is one pin per channel, plus a shared pin for connecting back to ground / 0V.
+There is one pin per channel, plus a shared pin for connecting back to ground.
 We'll wire one output pin of the Pico 2 to each channel with a resistor in between to protect the LED and wire up the LED's ground pin to connect to a Pico 2 pin that exposes the Pico's ground so both parts agree on what 0V means exactly.
+Ground is abbreviated as "GND" and pins that expose this logic level are said to be "low".
+On the contrary, if a pin provides a current on the microcontroller's logic level then it is said to be "high".
+Pins that are intended to be connected to the power supply at the logic level are usually labeled "VCC".
+
+> [!NOTE]
+> The logic level might be different for different chips!
+> For the Pico 2 the logic level is 3.3V but other chips may use other voltages, e.g. 5V.
+> This is not relevant for this workshop: All hardware handed to you uses the same logic level as the Pico 2.
 
 Note how the pins / channels of the LED are numbered: pin 1 is blue, 2 is green, 3 is ground and 4 is red.
 You can check that you've got the LED the right way round by looking at the bottom end of the pins: pin 3 is longest, while pin 4 is shortest.
