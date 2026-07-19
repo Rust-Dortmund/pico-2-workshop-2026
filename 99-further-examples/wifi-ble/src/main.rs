@@ -43,9 +43,12 @@ pub static PICOTOOL_ENTRIES: [embassy_rp::binary_info::EntryAddr; 4] = [
     embassy_rp::binary_info::rp_program_build_attribute!(),
 ];
 
-// Load SSID and WiFi password from environment variables at build time.
+// Load SSID, WiFi password, and Bluetooth device name from environment variables at build time.
 const SSID: &str = env!("SSID");
 const PASSWORD: &str = env!("PASSWORD");
+const BLE_DEVICE_NAME: &str = concat!("LED ", env!("BLE_NAME"));
+// BLE advertisement packets are limited to 31 bytes; our payload leaves 21 bytes for the name.
+const _: () = assert!(BLE_DEVICE_NAME.as_bytes().len() <= 21);
 
 const WEB_TASK_POOL_SIZE: usize = 8;
 const NET_STACK_RESOURCES: usize = WEB_TASK_POOL_SIZE + 3;
@@ -209,7 +212,12 @@ async fn main(spawner: Spawner) {
     let Ble {
         ble_runner,
         connection_runner: ble_connection_runner,
-    } = ble::initialize(bluetooth_driver, watch.sender(), watch.receiver().unwrap());
+    } = ble::initialize(
+        bluetooth_driver,
+        watch.sender(),
+        watch.receiver().unwrap(),
+        BLE_DEVICE_NAME,
+    );
 
     let mut webserver_task_factory = webserver::initialize(network_stack, watch.sender());
 
