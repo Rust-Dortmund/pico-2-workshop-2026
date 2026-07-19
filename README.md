@@ -26,8 +26,8 @@ Note that the example solutions are separate crates and can't be run as a `cargo
 
 ## Troubleshooting
 
-We've put together some of the more common places where other participants got stuck and what to do if that happens to you at [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
-Hopefully, you won't need to, but if you ever feel like something's just not working or if you're facing a problem and all instructors are currently busy, you might want to go and have a look if you can find a solution for your problem in there.
+We've put together some of the more common places where people got stuck and what to do if that happens to you at [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+Hopefully, you won't need to, but if you ever feel like something is just not working or if you're facing a problem and all instructors are currently busy, you might want to go and have a look if you can find a solution for your problem in there.
 
 ## Embassy
 
