@@ -124,7 +124,14 @@
                         - Make it blink <!-- .element: class="fragment" -->
                         - Make it notice you <!-- .element: class="fragment" -->
                         - Break the workshop WiFi (probably) <!-- .element: class="fragment" -->
+                        - Learn about Bluetooth <!-- .element: class="fragment" -->
                         - Go at your own pace <!-- .element: class="fragment" -->
+
+                        ---
+
+                        ### Meet the Pico 2
+
+                        <img src="static/pico_2_w.png" alt="Raspberry Pico 2 W" style="max-width: 60%;margin: 0; padding: 0;" />
 
                         ---
 
@@ -205,7 +212,7 @@
 
                     </textarea>
                 </section>
-                <section>
+                <section data-visibility="hidden">
                     <div style="display: flex; justify-content: center; align-items: center;">
                         <p style="text-align: center;">WiFi:</p>
                     </div>
@@ -219,6 +226,104 @@
                     <div style="display: flex; justify-content: center; align-items: center;">
                         <p style="font-size: large;">SSID: epNEO_Guest<br>Password: aCkU%0S1gcA8uX</p>
                     </div>
+                </section>
+            </section>
+            <section>
+                <section>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <p style="text-align: center;">Instructions and Materials:</p>
+                    </div>
+
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <!--qrencode -o intro-slides/static/Workshop_QR.svg -t SVG --svg-path "https://github.com/Rust-Dortmund/pico-2-workshop-2026/"-->
+                        <img src="static/Workshop_QR.svg" width="30%"
+                            style="margin: 5px; border: 1px solid black; border-radius: 10px;" />
+                    </div>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <p style="font-size: large; text-align: center;">
+                            <code>https://github.com/Rust-Dortmund/pico-2-workshop-2026/</code>
+                        </p>
+                    </div>
+                </section>
+                <section data-markdown data-separator-vertical="^\r?\n\s*---\s*\r?\n$" data-separator-notes="^Notes:" data-auto-animate>
+                    <textarea data-template>
+                        #### What You'll Find There
+
+                        <img style="max-width: 80%; border-radius: 0.25em;" src="static/readme.png" class="fragment" data-fragment-index="0"/>
+
+                        <p style="font-size: x-large; text-align: center; margin-top: 0;" class="fragment" data-fragment-index="0">
+                            A README and and setup instructions
+                        </p>
+
+                        ---
+                        
+                        #### What You'll Find There
+
+                        <img style="max-width: 80%; border-radius: 0.25em;" src="static/github-folders.png"/>
+
+                        <p style="font-size: x-large; text-align: center; margin-top: 0;">
+                            A sequence of exercises
+                        </p>
+
+                        ---
+                        
+                        #### What You'll Find There
+
+                        <img style="max-width: 65%; border-radius: 0.25em;" src="static/wiring-instructions-example.png"/>
+
+                        <p style="font-size: x-large; text-align: center; margin-top: 0;">
+                            Each exercise contains a README with instructions for wiring...
+                        </p>
+
+                        Notes:
+                        - Please do read those, as incorrect wiring may damage the hardware.
+                        - In general, power off your devices while you re-wire them to avoid bad connections while you're changing things around.
+
+                        ---
+                        
+                        #### What You'll Find There
+
+                        <img style="max-width: 80%; border-radius: 0.25em;" src="static/coding-instructions-example.png"/>
+
+                        <p style="font-size: x-large; text-align: center; margin-top: 0;">
+                            ... and coding.
+                        </p>
+
+                        Notes:
+                        - As you can see, coding instructions come with hints that you can choose to expand if you're unfamiliar with the topic or just generally want some more guidance.
+
+                        ---
+                        
+                        #### What You'll Find There
+
+                        <img style="max-width: 100%; border-radius: 0.25em;" src="static/exercise-file-structure.png"/>
+
+                        <p style="font-size: x-large; text-align: center; margin-top: 0; margin-bottom: 3px;">
+                            Each exercise is a standalone <code>cargo</code> project.
+                        </p>
+                        <ul style="font-size: 1.35rem; margin-top: 0;">
+                            <li>The <code>example</code> folder contains an example solution as a separate <code>cargo</code> project</li>
+                            <li>Please turn off your IDE's AI autocomplete - it <em>will</em> find the full code!</li>
+                        </ul>
+
+                        Notes:
+                        - Using a language server like `rust-analyzer` is fine and can be a good way to discover the methods offered by the crates we will use.
+
+                        ---
+                        
+                        #### What You'll Find There
+
+                        <img style="max-width: 65%; border-radius: 0.25em; margin-bottom: 0;" src="static/todo-comments.png"/>
+                        <img style="max-width: 65%; border-radius: 0.25em; margin-top: 0;" src="static/todo-macros.png"/>
+
+                        <p style="font-size: x-large; text-align: center; margin-top: 0;">
+                            There will already be some code present to start from for each exercise, with anything that you still need to adjust or implement marked with <code>// TODO</code> comments or the <code>todo!</code> macro.
+                        </p>
+
+                        Notes:
+                        - For successive exercises, you may also start from your own solution of the previous exercise.
+
+                    </textarea>
                 </section>
                 <section>
                     <div style="display: flex; justify-content: center; align-items: center;">
