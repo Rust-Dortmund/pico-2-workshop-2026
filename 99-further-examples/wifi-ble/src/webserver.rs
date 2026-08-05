@@ -11,18 +11,6 @@ use picoserve::{
 
 use crate::{led::Color, led_controller::ColorSender};
 
-/// State of the webserver.
-#[derive(Clone)]
-struct AppState {
-    sender: ColorSender<2>,
-}
-
-impl picoserve::extract::FromRef<AppState> for ColorSender<2> {
-    fn from_ref(state: &AppState) -> Self {
-        state.sender.clone()
-    }
-}
-
 /// Defines the routes supported by the webserver by implementing the [`AppWithStateBuilder`] trait.
 struct AppProps;
 
@@ -61,15 +49,20 @@ pub(crate) struct WebserverRunner {
 }
 
 impl WebserverRunner {
+    const PORT: u16 = 80;
+
     pub(crate) async fn run(self) -> ! {
-        const PORT: u16 = 80;
+        // Reserve some stack space for sending and receiving requests / responses.
         let mut tcp_rx_buffer = [0; 1024];
         let mut tcp_tx_buffer = [0; 1024];
         let mut http_buffer = [0; 2048];
 
+        // Create a `picoserve` server on top of the `embassy` net stack.
         let app = self.app.shared().with_state(self.state);
         let server = picoserve::Server::new(&app, self.config, &mut http_buffer);
-        match server.listen_and_serve(self.id, self.stack, PORT, &mut tcp_rx_buffer, &mut tcp_tx_buffer).await {
+
+        // Listen for incoming requests that the server will then handle.
+        match server.listen_and_serve(self.id, self.stack, Self::PORT, &mut tcp_rx_buffer, &mut tcp_tx_buffer).await {
             // This can only happen if the server is set up `with_graceful_shutdown`, which we don't use.
         }
     }
@@ -125,5 +118,17 @@ pub(crate) fn initialize(
         app,
         config,
         state,
+    }
+}
+
+/// State of the webserver.
+#[derive(Clone)]
+struct AppState {
+    sender: ColorSender<2>,
+}
+
+impl picoserve::extract::FromRef<AppState> for ColorSender<2> {
+    fn from_ref(state: &AppState) -> Self {
+        state.sender.clone()
     }
 }
