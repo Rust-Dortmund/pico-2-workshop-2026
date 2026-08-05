@@ -16,7 +16,7 @@ use crate::{
 };
 use cyw43::{Cyw43439, JoinOptions, NetDriver, SpiBus, aligned_bytes, bluetooth::BtDriver};
 use cyw43_pio::{PioSpi, RM2_CLOCK_DIVIDER};
-use defmt::*;
+use defmt::{info, unwrap};
 use embassy_executor::Spawner;
 use embassy_net::StackResources;
 use embassy_rp::{
@@ -110,7 +110,7 @@ async fn run_print_ip(runner: PrintIpRunner) {
 /// Task driving the LED.
 #[embassy_executor::task]
 async fn run_led_controller(runner: LedControllerRunner) {
-    runner.run().await.expect("Infallible");
+    runner.run().await
 }
 
 /// Task running the webserver.
