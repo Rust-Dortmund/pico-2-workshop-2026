@@ -80,31 +80,21 @@ Ensure the Bluetooth service is running (for example, `bluetoothctl show` should
 Your user account typically needs permission to talk to BlueZ; on many distributions this means being a member of the `bluetooth` group, followed by logging out and back in.
 If you use the AppImage, make it executable (`chmod +x toolBLEx-*.AppImage`) before running it.
 
-### What to Look For on the Device
+### Using your GATT Client
 
-When the Pico is advertising and ready to accept connections, you should be able to find a device with the following properties:
+When the Pico 2 is advertising and ready to accept connections, you should be able to find a device with an advertised name of whatever you set `BLE_NAME` to (e.g., `Alice`) when running a scan with your client.
+Once your device appears in the device list, connect to it and open the GATT table.
+The client should show a single service with the following properties:
 
 | What | Value |
 | --- | --- |
-| Advertised name | The value of `BLE_NAME` (e.g. `Alice`) |
 | Service UUID | `0x180A` (Device Information - reused here for the LED service) |
 | Characteristic UUID | `0x2A57` (`color`; supports read, write, and notify) |
 | Valid write values | Single byte: `0x00` = red, `0x01` = green, `0x02` = blue |
 
-Reading the characteristic returns the current LED color as one of those three byte values.
-Writing a single byte in that range changes the LED; any other value is rejected as out of range.
-
-### Using toolBLEx
-
-With your program running on the Pico, open toolBLEx and start a scan.
-When your device appears in the device list, connect to it and open the GATT table.
-Navigate to service `0x180A` and the characteristic `0x2A57`.
-
-You can read the characteristic to see the current color (`00`, `01`, or `02` in hexadecimal).
-To change the LED, write a single byte to the characteristic: `00` for red, `01` for green, or `02` for blue.
+Reading the characteristic should return the current LED color as one of those three byte values.
+Writing a single byte in that range should change the LED; any other value should be rejected as out of range.
 If you enable notifications on the characteristic, you should also see updates when the LED color changes through another path (for example, via the WiFi webserver).
-
-The workflow in nRF Connect for Mobile is the same: scan for your device name, connect, expand service `0x180A`, and use the read, write, and notify controls on characteristic `0x2A57`.
 
 ### Troubleshooting
 
