@@ -54,10 +54,10 @@ Download the latest release for your operating system from the project's GitHub 
 - **macOS:** `toolBLEx-*-macOS.zip`
 - **Linux:** `toolBLEx-*-linux64.AppImage` (or `.tar.gz`)
 
-No extra hardware is required, only a laptop with a working Bluetooth adapter (if your laptop doesn't have bluetooth and you also don't have an adapter, you can try using [your phone with a mobile app](#alternative-nrf-connect-for-mobile) instead).
+No extra hardware is required, only a laptop with a working Bluetooth adapter (if your laptop doesn't have bluetooth and you also don't have an adapter, you can try using [your phone with a mobile app](#alternative-clients) instead).
 
 > [!TIP]
-> If you prefer using a terminal tool, see [alternatives](#alternative-cli-tools).
+> If you prefer using a terminal tool, you can find some under [alternatives](#alternative-clients) as well.
 
 Before the exercise, open toolBLEx once and start a scan to confirm that your laptop can see nearby BLE devices.
 If the app reports a problem, fix your host Bluetooth setup first (see the troubleshooting section below).
@@ -110,12 +110,7 @@ Other payloads are rejected by the firmware.
 
 If the advertised name is missing and you only see a device address, look for a peripheral that advertises service UUID `180A`, or power-cycle the Pico and scan again.
 
-### Alternative: nRF Connect for Mobile
-
-If you prefer to test from a phone, or if you run into problems with your laptop's Bluetooth stack, you can use [nRF Connect for Mobile](https://www.nordicsemi.com/Products/Development-tools/nrf-connect-for-mobile) instead.
-It is available for free on [Android](https://play.google.com/store/apps/details?id=no.nordicsemi.android.mcp) and [iOS](https://apps.apple.com/app/nrf-connect-for-mobile/id1054362403) and offers the same basic workflow: scan, connect, browse the GATT table, and read or write characteristics.
-
-### Alternative: CLI Tools
+### Alternative Clients
 
 If you don't like using or can't use the `toolBLEx` GUI app, you can use one of the CLI tools listed below.
 Unfortunately, there isn't currently a good cross-platform tool that supports everything we need, so please select the appropriate tool for your platform.
@@ -123,3 +118,7 @@ Unfortunately, there isn't currently a good cross-platform tool that supports ev
 - **macOS**: [`blew` -- BLE scanner and CLI tool for Mac OS X](https://github.com/stass/blew)
 - **Linux**: `gattcat` from [BlueR tools](https://crates.io/crates/bluer-tools)
 - **Windows**: [`BLEConsole`](https://github.com/sensboston/BLEConsole)
+
+Alternatively, you can connect to the Pico 2 using your phone via the [nRF Connect for Mobile](https://www.nordicsemi.com/Products/Development-tools/nrf-connect-for-mobile) app.
+This might be useful if you run into problems with your laptop's Bluetooth stack (or if you're having trouble with Bluetooth permissions on a company device).
+It is available for free on [Android](https://play.google.com/store/apps/details?id=no.nordicsemi.android.mcp) and [iOS](https://apps.apple.com/app/nrf-connect-for-mobile/id1054362403) and offers the same basic workflow: scan, connect, browse the GATT table, and read or write characteristics.
