@@ -27,7 +27,7 @@ TODO
 Once your program is running, the Pico 2 W will advertise itself over Bluetooth Low Energy (BLE) under the name you configured — for example **Alice** if you set `BLE_NAME=Alice`.
 You can connect to it from your laptop or phone and interact with the LED through GATT characteristics, in addition to the WiFi webserver from the previous exercise.
 
-To do so, you will need a so-called _GATT client_ — a small application that can scan for BLE devices, connect to one, browse its services and characteristics, and read from or write to those characteristics.
+To do so, you will need a so-called _GATT client_ - a small application that can scan for BLE devices, connect to one, browse its services and characteristics, and read from or write to those characteristics.
 We recommend installing one before the workshop so you can focus on the exercise itself.
 
 ### Setting Your Own Device Name
@@ -87,7 +87,7 @@ When the Pico is advertising and ready to accept connections, you should be able
 | What | Value |
 | --- | --- |
 | Advertised name | The value of `BLE_NAME` (e.g. `Alice`) |
-| Service UUID | `0x180A` (Device Information — reused here for the LED service) |
+| Service UUID | `0x180A` (Device Information - reused here for the LED service) |
 | Characteristic UUID | `0x2A57` (`color`; supports read, write, and notify) |
 | Valid write values | Single byte: `0x00` = red, `0x01` = green, `0x02` = blue |
 
@@ -97,7 +97,7 @@ Writing a single byte in that range changes the LED; any other value is rejected
 ### Using toolBLEx
 
 With your program running on the Pico, open toolBLEx and start a scan.
-When your device (for example **Alice**) appears in the device list, connect to it and open the GATT table.
+When your device appears in the device list, connect to it and open the GATT table.
 Navigate to service `0x180A` and the characteristic `0x2A57`.
 
 You can read the characteristic to see the current color (`00`, `01`, or `02` in hexadecimal).
