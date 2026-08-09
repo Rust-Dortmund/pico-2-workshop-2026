@@ -24,7 +24,7 @@ TODO
 
 ## Testing over Bluetooth
 
-Once your program is running, the Pico 2 W will advertise itself over Bluetooth Low Energy (BLE) under the name you configured — for example **LED Alice** if you set `BLE_NAME=Alice`.
+Once your program is running, the Pico 2 W will advertise itself over Bluetooth Low Energy (BLE) under the name you configured — for example **Alice** if you set `BLE_NAME=Alice`.
 You can connect to it from your laptop or phone and interact with the LED through GATT characteristics, in addition to the WiFi webserver from the previous exercise.
 
 To do so, you will need a so-called _GATT client_ — a small application that can scan for BLE devices, connect to one, browse its services and characteristics, and read from or write to those characteristics.
@@ -33,11 +33,11 @@ We recommend installing one before the workshop so you can focus on the exercise
 ### Setting Your Own Device Name
 
 Since everyone in the workshop will be running the same code, by default every Pico would advertise under the same device name, making it hard to tell your device apart from your neighbours'.
-To avoid that, before the program will compile you'll need to provide a short unique identifier through the `BLE_NAME` environment variable when compiling the program.
-The firmware turns this into the advertised device name `LED <BLE_NAME>` - for example, `BLE_NAME=Alice` gives **LED Alice**, and `BLE_NAME=7` gives **LED 7**.
+To avoid that, before the program will compile you'll need to provide a short unique name through the `BLE_NAME` environment variable when compiling the program.
+This value is used directly as the advertised Bluetooth device name — for example, `BLE_NAME=Alice` gives **Alice**, and `BLE_NAME=Table-7` gives **Table-7**.
 
 Pick something you will recognize in the scan list on your laptop or phone.
-The name must fit into a single BLE advertisement packet, so keep `BLE_NAME` short (roughly 17 characters or fewer).
+The name must fit into a single BLE advertisement packet, so keep it to 21 characters or fewer.
 
 Like the WiFi credentials from the previous exercise, export `BLE_NAME` before building or flashing:
 
@@ -86,7 +86,7 @@ When the Pico is advertising and ready to accept connections, you should be able
 
 | What | Value |
 | --- | --- |
-| Advertised name | `LED <BLE_NAME>` (e.g. `LED Alice`) |
+| Advertised name | The value of `BLE_NAME` (e.g. `Alice`) |
 | Service UUID | `0x180A` (Device Information — reused here for the LED service) |
 | Characteristic UUID | `0x2A57` (`color`; supports read, write, and notify) |
 | Valid write values | Single byte: `0x00` = red, `0x01` = green, `0x02` = blue |
@@ -97,7 +97,7 @@ Writing a single byte in that range changes the LED; any other value is rejected
 ### Using toolBLEx
 
 With your program running on the Pico, open toolBLEx and start a scan.
-When your device (for example **LED Alice**) appears in the device list, connect to it and open the GATT table.
+When your device (for example **Alice**) appears in the device list, connect to it and open the GATT table.
 Navigate to service `0x180A` and the characteristic `0x2A57`.
 
 You can read the characteristic to see the current color (`00`, `01`, or `02` in hexadecimal).

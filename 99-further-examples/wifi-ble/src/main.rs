@@ -34,9 +34,9 @@ use {defmt_rtt as _, panic_probe as _};
 // Load SSID, WiFi password, and Bluetooth device name from environment variables at build time.
 const SSID: &str = env!("SSID");
 const PASSWORD: &str = env!("PASSWORD");
-const BLE_DEVICE_NAME: &str = concat!("LED ", env!("BLE_NAME"));
+const BLE_NAME: &str = env!("BLE_NAME");
 // BLE advertisement packets are limited to 31 bytes; our payload leaves 21 bytes for the name.
-const _: () = assert!(BLE_DEVICE_NAME.as_bytes().len() <= 21);
+const _: () = assert!(BLE_NAME.as_bytes().len() <= 21);
 
 // How many concurrent requests can we handle?
 const WEB_TASK_POOL_SIZE: usize = 8;
@@ -205,7 +205,7 @@ async fn main(spawner: Spawner) {
         bluetooth_driver,
         watch.sender(),
         watch.receiver().unwrap(),
-        BLE_DEVICE_NAME,
+        BLE_NAME,
     );
 
     info!("Initializing web server");
