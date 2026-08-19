@@ -193,6 +193,5 @@ async fn main(spawner: Spawner) {
     // Not much to do in `main` anymore, since all of the networking stuff runs through the stack.
     loop {
         Timer::after(Duration::from_secs(5)).await;
-        info!("Hello from main!");
     }
 }
