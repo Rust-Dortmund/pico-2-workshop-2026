@@ -14,6 +14,10 @@ TrouBLE docs: https://embassy.dev/trouble/
 
 TODO
 
+### Advertisements
+
+TODO
+
 ## Wiring
 
 TODO
@@ -37,7 +41,7 @@ To avoid that, before the program will compile you'll need to provide a short un
 This value is used directly as the advertised Bluetooth device name — for example, `BLE_NAME=Alice` gives **Alice**, and `BLE_NAME=Table-7` gives **Table-7**.
 
 Pick something you will recognize in the scan list on your laptop or phone.
-The name must fit into a single BLE advertisement packet, so keep it to 21 characters or fewer.
+The name must fit into a single BLE advertisement packet, so keep it to 22 characters or fewer (to understand why this exact number, see [Advertisements](#advertisements)).
 
 Like the WiFi credentials from the previous exercise, export `BLE_NAME` before building or flashing:
 

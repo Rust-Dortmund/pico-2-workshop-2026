@@ -35,8 +35,8 @@ use {defmt_rtt as _, panic_probe as _};
 const SSID: &str = env!("SSID");
 const PASSWORD: &str = env!("PASSWORD");
 const BLE_NAME: &str = env!("BLE_NAME");
-// BLE advertisement packets are limited to 31 bytes; our payload leaves 21 bytes for the name.
-const _: () = assert!(BLE_NAME.as_bytes().len() <= 21);
+// BLE advertisement packets are limited to 31 bytes; our payload leaves 22 bytes for the name.
+const _: () = assert!(BLE_NAME.as_bytes().len() <= 22);
 
 // How many concurrent requests can we handle?
 const WEB_TASK_POOL_SIZE: usize = 8;
