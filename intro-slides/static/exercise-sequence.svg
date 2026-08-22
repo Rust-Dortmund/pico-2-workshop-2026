@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 540" width="1000" height="540" font-family="Palatino Linotype, Book Antiqua, Palatino, FreeSerif, serif">
+  <defs>
+    <marker id="arrow-dark" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#51483D"/>
+    </marker>
+    <marker id="arrow-sensing" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9c5a1f"/>
+    </marker>
+    <marker id="arrow-connectivity" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2b6a8a"/>
+    </marker>
+  </defs>
+
+  <!-- shared trunk -->
+  <rect x="370" y="10" width="260" height="50" rx="8" fill="#ffffff" stroke="#51483D" stroke-width="2.5"/>
+  <text x="500" y="41" text-anchor="middle" font-family="monospace" font-size="20" fill="#383D3D">00-setup</text>
+
+  <line x1="500" y1="60" x2="500" y2="88" stroke="#51483D" stroke-width="2.5" marker-end="url(#arrow-dark)"/>
+
+  <rect x="370" y="90" width="260" height="50" rx="8" fill="#ffffff" stroke="#51483D" stroke-width="2.5"/>
+  <text x="500" y="121" text-anchor="middle" font-family="monospace" font-size="20" fill="#383D3D">01-multicolor-led</text>
+
+  <line x1="500" y1="140" x2="500" y2="168" stroke="#51483D" stroke-width="2.5" marker-end="url(#arrow-dark)"/>
+
+  <rect x="370" y="170" width="260" height="50" rx="8" fill="#ffffff" stroke="#51483D" stroke-width="2.5"/>
+  <text x="500" y="201" text-anchor="middle" font-family="monospace" font-size="20" fill="#383D3D">02-distance-light</text>
+
+  <!-- branch -->
+  <text x="500" y="243" text-anchor="middle" font-size="19" font-style="italic" fill="#383D3D">Choose a path!</text>
+
+  <line x1="440" y1="220" x2="270" y2="258" stroke="#9c5a1f" stroke-width="2.5" marker-end="url(#arrow-sensing)"/>
+  <line x1="560" y1="220" x2="730" y2="258" stroke="#2b6a8a" stroke-width="2.5" marker-end="url(#arrow-connectivity)"/>
+
+  <!-- sensing path -->
+  <text x="260" y="284" text-anchor="middle" font-size="21" fill="#9c5a1f">Sensing Path</text>
+
+  <rect x="110" y="300" width="300" height="50" rx="8" fill="#ffffff" stroke="#9c5a1f" stroke-width="2.5"/>
+  <text x="260" y="331" text-anchor="middle" font-family="monospace" font-size="18" fill="#383D3D">03s-sun-detector</text>
+
+  <line x1="260" y1="350" x2="260" y2="378" stroke="#9c5a1f" stroke-width="2.5" marker-end="url(#arrow-sensing)"/>
+
+  <rect x="110" y="380" width="300" height="50" rx="8" fill="#ffffff" stroke="#9c5a1f" stroke-width="2.5"/>
+  <text x="260" y="411" text-anchor="middle" font-family="monospace" font-size="18" fill="#383D3D">04s-gesture-toggle-lamp</text>
+
+  <!-- connectivity path -->
+  <text x="740" y="284" text-anchor="middle" font-size="21" fill="#2b6a8a">Connectivity Path</text>
+
+  <rect x="640" y="300" width="200" height="50" rx="8" fill="#ffffff" stroke="#2b6a8a" stroke-width="2.5"/>
+  <text x="740" y="331" text-anchor="middle" font-family="monospace" font-size="18" fill="#383D3D">03c-wifi</text>
+
+  <line x1="740" y1="350" x2="740" y2="378" stroke="#2b6a8a" stroke-width="2.5" marker-end="url(#arrow-connectivity)"/>
+
+  <rect x="640" y="380" width="200" height="50" rx="8" fill="#ffffff" stroke="#2b6a8a" stroke-width="2.5"/>
+  <text x="740" y="411" text-anchor="middle" font-family="monospace" font-size="18" fill="#383D3D">04c-wifi-ble</text>
+
+  <!-- converge note -->
+  <line x1="260" y1="430" x2="450" y2="465" stroke="#51483D" stroke-width="2" stroke-dasharray="6 5"/>
+  <line x1="740" y1="430" x2="550" y2="465" stroke="#51483D" stroke-width="2" stroke-dasharray="6 5"/>
+
+  <rect x="260" y="465" width="480" height="55" rx="10" fill="none" stroke="#51483D" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="500" y="498" text-anchor="middle" font-size="18" font-style="italic" fill="#383D3D">If time permits: Try the other path or build something freestyle!</text>
+</svg>
