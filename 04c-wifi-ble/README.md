@@ -66,7 +66,7 @@ Here, the header indicates the type of advertisement (more on that below), some 
 ```
 
 > [!TIP]
-> ** Types of advertisements** 
+> **Types of advertisements**
 > The Bluetooth standard distinguishes quite a few different types of advertisements because devices have to indicate together with the advertisement whether one can connect to them or not, if so, whether that is true for everyone or whether they are only advertising to a specific set of peers, and whether they can be scanned for additional information without connecting.
 > There are also special advertisement types for advertising on nonstandard frequency channels.
 > We will only be using the most simple type of advertisement today, which lets anyone scan and connect to the device.
