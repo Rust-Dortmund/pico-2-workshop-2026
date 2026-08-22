@@ -112,21 +112,6 @@ impl BleConnectionRunner {
         };
     }
 
-    /// Accepts a [`WriteEvent`] to a characteristic in a GATT service.
-    ///
-    /// # Cancellation safety
-    ///
-    /// This function is cancel safe.
-    async fn accept_write_event<P: PacketPool>(event: WriteEvent<'_, '_, P>) {
-        match event.accept() {
-            // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
-            Ok(reply) => reply.send().await,
-            Err(e) => {
-                info!("[gatt] error sending response: {:?}", e)
-            }
-        }
-    }
-
     /// Handles write access to a characteristic in a GATT service.
     ///
     /// # Cancellation safety
@@ -159,8 +144,13 @@ impl BleConnectionRunner {
             });
 
             if accepted {
-                // CANCELLATION SAFETY: Documented as being cancel safe.
-                Self::accept_write_event(event).await;
+                match event.accept(){
+                    // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
+                    Ok(reply) => reply.send().await,
+                    Err(e) => {
+                        info!("[gatt] error sending response: {:?}", e)
+                    }
+                }
             } else {
                 match event.reject(AttErrorCode::OUT_OF_RANGE) {
                     // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs

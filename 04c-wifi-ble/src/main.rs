@@ -162,6 +162,9 @@ async fn main(spawner: Spawner) {
     info!("Initializing CYW43");
     let state = mk_static!(cyw43::State, cyw43::State::new());
     let cyw43_power = Output::new(PIN_23, Level::Low);
+    // NEW               vvvvvvvvvvvvvvvv
+    // Gain access to the bluetooth driver by switching to `new_with_bluetooth`,
+    // which requires passing the bluetooth firmware in addition to WiFi.
     let (network_device, bluetooth_driver, mut control, runner) =
         cyw43::new_with_bluetooth(state, cyw43_power, spi, fw, btfw, nvram).await;
 
@@ -201,12 +204,7 @@ async fn main(spawner: Spawner) {
     let Ble {
         ble_runner,
         connection_runner: ble_connection_runner,
-    } = ble::initialize(
-        bluetooth_driver,
-        watch.sender(),
-        watch.receiver().unwrap(),
-        BLE_NAME,
-    );
+    } = todo!("call ble::initialize");
 
     info!("Initializing web server");
     let mut webserver_task_factory = webserver::initialize(network_stack, watch.sender());

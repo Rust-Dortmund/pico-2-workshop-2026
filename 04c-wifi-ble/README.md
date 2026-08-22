@@ -14,11 +14,7 @@ TODO
 
 ### Advertisements
 
-TODO
-
 ### GATT
-
-TODO
 
 ## Wiring
 
@@ -35,6 +31,8 @@ Since we only needed them to send requests from the web server to the LED runner
 
 If we're now keeping the HTTP API and adding Bluetooth on top of it, that is no longer enough.
 To enable sending data to the LED runner from an incoming Bluetooth connection, generalize the types in `led_receiver` to more than 1 participant. 
+
+Then, initialize the bluetooth stack from `main` by fixing the `todo!` about calling `ble::initialize` with the correct parameters.
 
 <details>
 
@@ -53,10 +51,23 @@ Therefore, with keeping WiFi, there are now 2 senders and 2 receivers in total.
 
 </details>
 
-### a
+### GATT Service Definition
 
 TrouBLE docs: https://embassy.dev/trouble/
 
+### Advertisements
+
+- Flags
+- Service UUIDs 
+- Name
+
+Allow connect and scan.
+
+### Handling GATT Reads
+
+### Handling GATT Writes
+
+### Notifications
 
 ## Testing over Bluetooth
 
