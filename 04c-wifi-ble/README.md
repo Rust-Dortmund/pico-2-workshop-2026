@@ -16,6 +16,10 @@ TODO
 
 TODO
 
+### GATT
+
+TODO
+
 ## Wiring
 
 TODO
@@ -24,7 +28,35 @@ TODO
 
 TODO
 
+### Foundations
+
+When we added the HTTP API for setting color values, we introduced some synchronization primitives for communicating LED color changes / requests.
+Since we only needed them to send requests from the web server to the LED runner, they can currently only facilitate a single connection.
+
+If we're now keeping the HTTP API and adding Bluetooth on top of it, that is no longer enough.
+To enable sending data to the LED runner from an incoming Bluetooth connection, generalize the types in `led_receiver` to more than 1 participant. 
+
+<details>
+
+<summary>Hint 1</summary>
+
+You may also need to generalize the `LedControllerRunner` and adjust a few callsites.
+
+</details>
+
+<details>
+
+<summary>Hint 2</summary>
+
+Keep in mind that we're adding both a new sender (incoming Bluetooth writes) _and_ a new receiver for Bluetooth subscriptions / notifications.
+Therefore, with keeping WiFi, there are now 2 senders and 2 receivers in total.
+
+</details>
+
+### a
+
 TrouBLE docs: https://embassy.dev/trouble/
+
 
 ## Testing over Bluetooth
 

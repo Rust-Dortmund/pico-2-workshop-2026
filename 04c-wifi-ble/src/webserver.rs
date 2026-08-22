@@ -23,7 +23,7 @@ impl AppWithStateBuilder for AppProps {
             // On POST to `/color/<something>` we expect `something` to parse as a `Color`.
             ("/color", parse_path_segment()),
             post(
-                |color: Color, State(sender): State<ColorSender<2>>| async move {
+                |color: Color, State(sender): State<ColorSender>| async move {
                     info!("[Webserver] Setting led to {}", color);
                     // Notify the LED controller of the new color.
                     sender.send(color);
@@ -96,11 +96,13 @@ impl WebserverRunnerFactory {
 /// The receiver end for `sender` needs to point to the LED controller so POSTing to the webserver changes the LED color.
 pub(crate) fn initialize(
     stack: embassy_net::Stack<'static>,
-    sender: ColorSender<2>,
+    sender: ColorSender,
 ) -> WebserverRunnerFactory {
+    // Create the initial state and global router.
     let state = AppState { sender };
     let app = make_static!(AppRouter<AppProps>, AppProps.build_app());
 
+    // Configure some default values for request timeouts.
     let config = make_static!(
         picoserve::Config,
         picoserve::Config::new(picoserve::Timeouts {
@@ -112,6 +114,7 @@ pub(crate) fn initialize(
         .keep_connection_alive()
     );
 
+    // Create the factory.
     WebserverRunnerFactory {
         next_id: 0,
         stack,
@@ -121,13 +124,14 @@ pub(crate) fn initialize(
     }
 }
 
-/// State of the webserver.
+/// Webserver state.
+/// In our case, we just need a channel connection for sending color requests to the LED controller.
 #[derive(Clone)]
 struct AppState {
-    sender: ColorSender<2>,
+    sender: ColorSender,
 }
 
-impl picoserve::extract::FromRef<AppState> for ColorSender<2> {
+impl picoserve::extract::FromRef<AppState> for ColorSender {
     fn from_ref(state: &AppState) -> Self {
         state.sender.clone()
     }

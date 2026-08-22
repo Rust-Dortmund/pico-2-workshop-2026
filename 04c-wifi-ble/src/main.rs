@@ -139,10 +139,10 @@ async fn main(spawner: Spawner) {
         ..
     } = embassy_rp::init(Default::default());
 
-    let fw = aligned_bytes!("../../../cyw43-firmware/43439A0.bin");
-    let clm = aligned_bytes!("../../../cyw43-firmware/43439A0_clm.bin");
-    let btfw = aligned_bytes!("../../../cyw43-firmware/43439A0_btfw.bin");
-    let nvram = aligned_bytes!("../../../cyw43-firmware/nvram_rp2040.bin");
+    let fw = aligned_bytes!("../../cyw43-firmware/43439A0.bin");
+    let clm = aligned_bytes!("../../cyw43-firmware/43439A0_clm.bin");
+    let btfw = aligned_bytes!("../../cyw43-firmware/43439A0_btfw.bin");
+    let nvram = aligned_bytes!("../../cyw43-firmware/nvram_rp2040.bin");
 
     // Set up communication with the WiFi chip.
     let cyw43_chip_select = Output::new(PIN_25, Level::High);

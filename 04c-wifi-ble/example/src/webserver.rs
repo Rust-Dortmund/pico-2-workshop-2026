@@ -98,9 +98,11 @@ pub(crate) fn initialize(
     stack: embassy_net::Stack<'static>,
     sender: ColorSender<2>,
 ) -> WebserverRunnerFactory {
+    // Create the initial state and global router.
     let state = AppState { sender };
     let app = make_static!(AppRouter<AppProps>, AppProps.build_app());
 
+    // Configure some default values for request timeouts.
     let config = make_static!(
         picoserve::Config,
         picoserve::Config::new(picoserve::Timeouts {
@@ -112,6 +114,7 @@ pub(crate) fn initialize(
         .keep_connection_alive()
     );
 
+    // Create the factory.
     WebserverRunnerFactory {
         next_id: 0,
         stack,
@@ -121,7 +124,8 @@ pub(crate) fn initialize(
     }
 }
 
-/// State of the webserver.
+/// Webserver state.
+/// In our case, we just need a channel connection for sending color requests to the LED controller.
 #[derive(Clone)]
 struct AppState {
     sender: ColorSender<2>,
