@@ -141,6 +141,8 @@ Here's some further things to search for online:
 - Security, pairing, and bonding
 - GATT protocol details and service metadata (discover services, related characteristics, etc.)
 
+If you want to read more about BLE, a good place to start is the Nordic Semiconductor DevAcademy, which hosts an [introductory course](https://academy.nordicsemi.com/courses/bluetooth-low-energy-fundamentals/lessons/lesson-1-bluetooth-low-energy-introduction/topic/what-is-bluetooth-le/) that covers a broad set of topics.
+
 </details>
 
 ## Wiring
