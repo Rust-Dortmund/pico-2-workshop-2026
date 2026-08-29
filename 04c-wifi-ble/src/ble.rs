@@ -3,6 +3,7 @@
 use cyw43::bluetooth::BtDriver;
 use defmt::info;
 use embassy_futures::select::select;
+use embassy_time::Timer;
 use trouble_host::prelude::*;
 
 use crate::{
@@ -165,6 +166,9 @@ impl BleConnectionRunner {
         }
 
         // TODO: When the LED color changes, notify the client
+        loop {
+            Timer::after_millis(500).await;
+        }
     }
 
     pub(crate) async fn run(mut self) {
