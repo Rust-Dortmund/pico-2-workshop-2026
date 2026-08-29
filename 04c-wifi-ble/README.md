@@ -11,22 +11,25 @@ Naturally, this means that it and particularly its "Low Energy" variant ("BLE") 
 
 ## Background: Bluetooth Low Energy
 
-The Bluetooth protocol is surprisingly old: introduced in 1998, it is only a couple of years younger than the original version of HTTP/1 ([RFC 1945](https://datatracker.ietf.org/doc/html/rfc1945) or HTTP/1.0), which was published in 1996.
+The Bluetooth protocol was introduced in 1998, only a couple of years after than the original version of HTTP/1 ([RFC 1945](https://datatracker.ietf.org/doc/html/rfc1945) or HTTP/1.0), which was published in 1996.
 Bluetooth operates over radio waves around 2.4GHz and data is exchanged over a packet-based protocol with a master/slave architecture.
 In the terms of the frameworks we will be using today, what we typically think of as a Bluetooth device - the device that we connect to - is called a "peripheral" and the device we connect from (such as a laptop or phone) is called a "central".
 
-Even the original Bluetooth protocol already concerned itself wita the energy consumption of Bluetooth devices, but generally expected devices to be continuously connected to each other and exchange data, as is the case with devices like headsets, wireless mice or keyboards, or other devices where the Bluetooth functionality primarily removes the need for them to be wired.
-With the advent of ever smaller devices become more and more "smart", this was no longer sufficient, as devices like smartwatches and health / fitness trackers, smart home sensors or locks, and tracking beacons ("tags") do not need to continuously transmit data, but should consume even less power, especially if they are battery-powered.
-This led to the development of a new Bluetooth protocol by Nokia in 2004, originally called Wibree, which first became part of the official Bluetooth standard in 2010 with Bluetooth version 4.0 as "Bluetooth Smart" and later got renamed to "Bluetooth Low Energy".
+Even the original Bluetooth protocol already concerned itself with the energy consumption of Bluetooth devices, but generally expected devices to be continuously connected to each other and exchange data, as is the case with devices like headsets, wireless mice or keyboards, or other devices where the Bluetooth functionality primarily removes the need for them to be wired.
+With the advent of ever smaller devices this was no longer sufficient, as they rarely have the need to continuously stream data, and have to consume even less power, especially if they are battery-powered.
+Examples for this category are smartwatches, health / fitness trackers, smart home sensors, locks, and tracking beacons ("tags"). 
+This led to the development of a new Bluetooth protocol by Nokia in 2004, originally called Wibree, which first became part of the official Bluetooth standard in 2010 with Bluetooth version 4.0 as "Bluetooth Smart" and later got renamed to "Bluetooth Low Energy" ("BLE").
 
 Bluetooth LE uses the same radio frequencies as "classic" Bluetooth, which you will see in the code as Bluetooth BR ("basic rate") or EDR ("extended data rate"), and can run side-by-side with it.
 However, not all devices have to support both and we will only be working with BLE today.
-The primary reason why BLE achieves lower power consumption is because BLE devices don't need to stay connected all the time and can spend a lot of their time sleeping between data exchanges, and because data can be broadcast without requiring a peer-to-peer connection to exist at all.
+BLE achieves lower power consumption by two primary means:
+Firstly, BLE devices don't need to stay continuously connected all the time and can spend a lot of their time sleeping between data exchanges.
+Secondly, BLE data can be broadcast without requiring a peer-to-peer connection to exist at all.
 In cases where a direct connection has to be established, BLE also allows such a connection to be established faster because only a subset of the overall frequency range is used for this purpose.
 
 ### Host Controller Interface
 
-Bluetooth implementations are usually split between a controller and a host.
+Bluetooth implementations are usually split between a **controller** and a **host**.
 You can think of the controller as the hardware components required to implement Bluetooth, such as antennas and components that convert analog radio signals to digital data, while the host is the software or application side of the implementation that handles encoding and decoding and decides what to send to which device when.
 
 Our host implementation is [TrouBLE](https://embassy.dev/trouble/), a BLE implementation for the embassy stack.
@@ -53,6 +56,7 @@ A BLE packet usually contains a small header including an address, a data payloa
 
 The preamble is a fixed bit pattern that devices can check for to quickly find where a packet starts.
 For each pair of devices or broadcast, a unique address is used for all packets that are part of that connection.
+Note that this is different from something like a physical / MAC address, which belongs to a distinc device and would be the same for all of this device's connections - here, the address identifies the communication channel between both devices, but the same devices will send packets with different addresses when communicating with other peers.
 The PDU, then, contains any dynamic data that might be different between one packet and the next.
 
 Different types of packets have different PDUs.
@@ -71,7 +75,7 @@ Here, the header indicates the type of advertisement (more on that below), some 
 > There are also special advertisement types for advertising on nonstandard frequency channels.
 > We will only be using the most simple type of advertisement today, which lets anyone scan and connect to the device.
 
-The payload itself consists of only two things: the device address (yes, another one - the previous one was for the connection channel, but this one is the same for all messages from the same device (like a MAC address)) and a list of advertisement data.
+The payload itself consists of only two things: the device address, which this time around _does_ act like a MAC address and will be the same for all messages from the same device and a list of advertisement data.
 We can send as many advertisement data values as we want and can fit into 31 bytes.
 
 ```
@@ -80,7 +84,7 @@ We can send as many advertisement data values as we want and can fit into 31 byt
 |                | AD 0 | AD 1 |   ...   | AD N |
 ```
 
-For each entry / value, we send 3 different things:
+For each entry / value, we send the following three things:
 
 - The length of the entry (excluding the length field),
 - A type tag that identifies the type of value we're sending, and
@@ -90,20 +94,29 @@ The type tags are predefined and refer to fixed quantities like the name of the 
 
 ```
 | AD Length |  AD Type |    AD Value    |
-|   1 Byte  | m Bytes* | Length-m Bytes |
+|   1 Byte  | m Bytes¹ | Length-m Bytes |
 ```
 
 For example, one of the data sets that we will be sending is the advertising flags, which is always 3 bytes (so length `2`), has the tag `BT_DATA_FLAGS` and a 1-byte bitfield of up to 8 flags.
 
-*Most type tags are 1 Byte, but there are some that are longer.
+¹ Most type tags are 1 Byte, but there are some that are longer.
+
+### Profiles
+
+In order to provide a specific functionality through Bluetooth, the peripheral device and central need to agree on a shared interface that assigns semantic meaning to data points exposed by the peripheral and controlled by the central.
+For example, for your headphones to act as headphones, they need to somehow tell your phone that they support audio streaming, your phone has to understand how to send audio data, and also how to control the volume of the music being played or read the headphone's battery level.
+In the Bluetooth standard, these common interfaces are called **profiles**.
+
+A Bluetooth profile in the most general terms is a specification regarding an aspect of Bluetooth-based wireless communication between devices. 
+Profile definitions are based on the Bluetooth Core Specification, but may optionally make use of additional protocols for specific functionality.
+Device manufacturers then implement the respective profiles for their devices depending on the intended function of the device.   
+There are many specific profiles that the Bluetooth group has defined over the years, such as profiles for audio, imaging, printing, health (e.g, blood pressure), fitness and activity (e.g., heart rate and navigation), and many more.
 
 ### GATT
 
-BLE defines many profiles for different types of devices, expecting devices to implement the appropriate profile to make sure they work correctly in their intended area of use by providing the interfaces defined in the profile.
-For example, there are specific profiles for audio, imaging, printing, health (e.g, blood pressure), fitness and activity (e.g., heart rate and navigation), and many more.
-
-GATT stands for the "Generic Attribute Profile", which as the name implies allows devices to freely define values and advertise them to other devices connecting to them.
-The GATT protocol then layers on a client-server model for reading and writing to such "attributes" through generic endpoints that operate on generic IDs that each represent an attribute.
+One particularly important profile which we will make use of today is called the "Generic Attribute Profile", or GATT, for short.
+As the name implies, GATT allows devices to freely define values and advertise them to other devices connecting to them through a dynamic discovery mechanism instead of a static, pre-defined list of specific values that have to be provided.
+The GATT protocol then layers on a client-server model for reading and writing to such "attributes" through generic endpoints that operate on generic ID representations of the attributes.
 
 In GATT terms, a **client** (like your phone) connects to a **server** (like the Pico 2) and sends it GATT commands and requests.
 The server receives and processes them and returns a response.
@@ -139,6 +152,7 @@ Here's some further things to search for online:
 - Scan data and extended advertising packets, directed and non-connectable advertisements
 - The exact packet format of all of the other packets and the meaning of the other bits and bytes
 - Security, pairing, and bonding
+- Random and resolvable device IDs
 - GATT protocol details and service metadata (discover services, related characteristics, etc.)
 
 If you want to read more about BLE, a good place to start is the Nordic Semiconductor DevAcademy, which hosts an [introductory course](https://academy.nordicsemi.com/courses/bluetooth-low-energy-fundamentals/lessons/lesson-1-bluetooth-low-energy-introduction/topic/what-is-bluetooth-le/) that covers a broad set of topics.
@@ -167,23 +181,16 @@ Since we only needed them to send requests from the web server to the LED runner
 
 If we're now keeping the HTTP API and adding Bluetooth on top of it, that is no longer enough.
 To enable sending data to the LED runner from an incoming Bluetooth connection, generalize the types in `led_receiver` to more than 1 participant. 
-
-Then, initialize the bluetooth stack from `main` by fixing the `todo!` about calling `ble::initialize` with the correct parameters.
-
-<details>
-
-<summary>Hint 1</summary>
-
-You may also need to generalize the `LedControllerRunner` and adjust a few callsites.
-
-</details>
-
-<details>
-
-<summary>Hint 2</summary>
-
 Keep in mind that we're adding both a new sender (incoming Bluetooth writes) _and_ a new receiver for Bluetooth subscriptions / notifications.
 Therefore, with keeping WiFi, there are now 2 senders and 2 receivers in total.
+
+Then, initialize the Bluetooth stack from `main` by fixing the `todo!` about calling `ble::initialize` with the correct parameters.
+
+<details>
+
+<summary>Hint</summary>
+
+You may also need to generalize the `LedControllerRunner` and adjust a few callsites.
 
 </details>
 
@@ -200,13 +207,9 @@ UUID should be:
 Initially, the LED will be RED.
 Your definition should include a name for the characteristic, as well as the range of valid values.
 
-<details>
+> [!TIP]
+> You can find the TrouBLE documentation on GATT services [here](https://embassy.dev/trouble/#_defining_services).
 
-<summary>Hint 1</summary>
-
-You can find the TrouBLE documentation on GATT services [here](https://embassy.dev/trouble/#_defining_services).
-
-</details>
 
 ### Advertisements
 
@@ -227,7 +230,7 @@ Allow connect and scan.
 ## Testing over Bluetooth
 
 Once your program is running, the Pico 2 W will advertise itself over Bluetooth Low Energy (BLE) under the name you configured — for example **Alice** if you set `BLE_NAME=Alice`.
-You can connect to it from your laptop or phone and interact with the LED through GATT characteristics, in addition to the WiFi webserver from the previous exercise.
+You can connect to it from your laptop or phone and interact with the LED through GATT characteristics, in addition to the WiFi web server from the previous exercise.
 
 To do so, you will need a so-called _GATT client_ - a small application that can scan for BLE devices, connect to one, browse its services and characteristics, and read from or write to those characteristics.
 We recommend installing one before the workshop so you can focus on the exercise itself and will be using the [nRF Connect for Mobile](https://www.nordicsemi.com/Products/Development-tools/nrf-connect-for-mobile) app as our primary testing tool, which is available for free on both [Android](https://play.google.com/store/apps/details?id=no.nordicsemi.android.mcp) and [iOS](https://apps.apple.com/app/nrf-connect-for-mobile/id1054362403).
@@ -303,7 +306,7 @@ Writing a single byte in that range should change the LED, which you should be a
 </div>
 
 You can send either a `UINT8`, in which case you enter the numeric value, or a `BYTE`, in which case you have to write out the full hexadecimal value (e.g., `01`).
-Since the characteristic supports notifications, you should also see updates when the LED color changes through another path (for example, via the WiFi webserver) if you tap the button with multiple down arrows to subscribe to the LED value.
+Since the characteristic supports notifications, you should also see updates when the LED color changes through another path (for example, via the WiFi web server) if you tap the button with multiple down arrows to subscribe to the LED value.
 
 #### Troubleshooting
 
@@ -367,12 +370,13 @@ Congratulations!
 You've made it to the end of the connectivity path.
 
 If this was the first path you completed, you can switch to the sensing path to learn more about connecting the Pico 2 to other sensors and performing gesture detection - to do so, start [here](../03s-sun-detector/README.md).
-Otherwise, or if you prefer to not do more structured learning today, you are free to poke at the APDS-9960 at your leisure and do whatever you want.
+Otherwise, or if you prefer to not do more structured learning today, you are free to poke at the APDS-9960, further explore the connectivity features of the Pico 2 or whatever else you want to take a peek at.
 If you want some ideas for what you can achieve with just the equipment you have, then for example you could
 
 - Have WiFi and Bluetooth control different aspects of the LED (such as color vs. brightness)
   - Or, if you've done the sensing path, color vs. operating mode or color vs. threshold for distance, gesture detection, etc.
 - Learn about Bluetooth security and add authentication for Bluetooth pairing (small tip: while we haven't provided you with any display or buttons, `defmt` log output can be a form of display too...)
+- Explore the predefined set of GATT services / profiles. For example, try to build a HID (human interface device) such as a game controller reacting to gestures.
 
 However you decide: We hope that you had a great experience and enjoyed the workshop so far, we are happy to have you here!
 We also appreciate feedback, just talk to us!
