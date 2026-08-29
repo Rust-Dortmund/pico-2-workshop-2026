@@ -1,55 +1,58 @@
 //! This module contains abstractions for working with LEDs.
 
-use core::{fmt::Display, marker::PhantomData, str::FromStr};
+use core::{fmt::Display, str::FromStr};
 
 use defmt::Format;
-use embedded_hal::digital::OutputPin;
+use embassy_rp::gpio::{Level, Output};
 
-pub(crate) enum LedState {
-    On,
-    Off,
+/// A wrapper around the three individual LED colors to control them as one.
+pub(crate) struct TriColorLed {
+    red_led: Output<'static>,
+    green_led: Output<'static>,
+    blue_led: Output<'static>,
+    color: Color,
+    on: bool,
 }
 
-pub(crate) trait Led {
-    type Error;
-
-    async fn turn_on(&mut self) -> Result<(), Self::Error>;
-    async fn turn_off(&mut self) -> Result<(), Self::Error>;
-
-    async fn set_state(&mut self, state: LedState) -> Result<(), Self::Error> {
-        match state {
-            LedState::On => self.turn_on().await,
-            LedState::Off => self.turn_off().await,
+impl TriColorLed {
+    pub(crate) fn new(
+        red_led: Output<'static>,
+        green_led: Output<'static>,
+        blue_led: Output<'static>,
+    ) -> Self {
+        Self {
+            red_led,
+            green_led,
+            blue_led,
+            color: Color::Red,
+            on: false,
         }
     }
 }
 
-pub(crate) struct ActiveHighOutputPinLed<Pin> {
-    pin: Pin,
-}
-
-impl<Pin> ActiveHighOutputPinLed<Pin>
-where
-    Pin: OutputPin,
-{
-    pub(crate) fn new(mut pin: Pin) -> Result<Self, Pin::Error> {
-        pin.set_low()?;
-        Ok(Self { pin })
-    }
-}
-
-impl<Pin> Led for ActiveHighOutputPinLed<Pin>
-where
-    Pin: OutputPin,
-{
-    type Error = Pin::Error;
-
-    async fn turn_on(&mut self) -> Result<(), Self::Error> {
-        self.pin.set_high()
+impl TriColorLed {
+    /// Change the color of the LED.
+    pub(crate) fn set_color(&mut self, color: Color) {
+        // Make sure the previous color is turned off before switching on the new color.
+        let was_on = self.on;
+        if self.on {
+            self.toggle();
+        }
+        self.color = color;
+        if was_on {
+            self.toggle();
+        }
     }
 
-    async fn turn_off(&mut self) -> Result<(), Self::Error> {
-        self.pin.set_low()
+    /// Switch the LED from on to off or vice-versa.
+    pub(crate) fn toggle(&mut self) {
+        let new_level = if self.on { Level::Low } else { Level::High };
+        self.on = !self.on;
+        match self.color {
+            Color::Red => self.red_led.set_level(new_level),
+            Color::Green => self.green_led.set_level(new_level),
+            Color::Blue => self.blue_led.set_level(new_level),
+        }
     }
 }
 
@@ -82,70 +85,5 @@ impl FromStr for Color {
             "blue" => Ok(Color::Blue),
             _ => Err(NoSuchColor),
         }
-    }
-}
-
-pub(crate) trait TriColorLed {
-    type Error;
-
-    async fn set_color(&mut self, color: Color) -> Result<(), Self::Error>;
-    async fn toggle(&mut self) -> Result<(), Self::Error>;
-}
-
-pub(crate) struct TrippleLedTriColorLed<R, G, B, Error> {
-    red_led: R,
-    green_led: G,
-    blue_led: B,
-    color: Color,
-    on: bool,
-    error: PhantomData<Error>,
-}
-
-impl<R, G, B, Error> TrippleLedTriColorLed<R, G, B, Error> {
-    pub(crate) fn new(red_led: R, green_led: G, blue_led: B) -> Self {
-        Self {
-            red_led,
-            green_led,
-            blue_led,
-            color: Color::Red,
-            on: false,
-            error: PhantomData,
-        }
-    }
-}
-
-impl<R, G, B, Error> TriColorLed for TrippleLedTriColorLed<R, G, B, Error>
-where
-    R: Led,
-    G: Led,
-    B: Led,
-    Error: From<R::Error> + From<G::Error> + From<B::Error>,
-{
-    type Error = Error;
-
-    async fn set_color(&mut self, color: Color) -> Result<(), Self::Error> {
-        let on = self.on;
-        if self.on {
-            self.toggle().await?;
-        }
-
-        self.color = color;
-
-        if on {
-            self.toggle().await?;
-        }
-
-        Ok(())
-    }
-
-    async fn toggle(&mut self) -> Result<(), Self::Error> {
-        let state = if self.on { LedState::Off } else { LedState::On };
-        self.on = !self.on;
-        match self.color {
-            Color::Red => self.red_led.set_state(state).await?,
-            Color::Green => self.green_led.set_state(state).await?,
-            Color::Blue => self.blue_led.set_state(state).await?,
-        }
-        Ok(())
     }
 }

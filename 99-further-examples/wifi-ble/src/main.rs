@@ -1,6 +1,6 @@
 #![no_std]
 #![no_main]
-// For picoserve.
+// Required for the `picoserve` webserver.
 #![feature(impl_trait_in_assoc_type)]
 
 mod ble;
@@ -16,7 +16,7 @@ use crate::{
 };
 use cyw43::{Cyw43439, JoinOptions, NetDriver, SpiBus, aligned_bytes, bluetooth::BtDriver};
 use cyw43_pio::{PioSpi, RM2_CLOCK_DIVIDER};
-use defmt::*;
+use defmt::{info, unwrap};
 use embassy_executor::Spawner;
 use embassy_net::StackResources;
 use embassy_rp::{
@@ -28,25 +28,17 @@ use embassy_rp::{
     pio::{InterruptHandler, Pio},
 };
 use embassy_time::{Duration, Timer};
-use static_cell::StaticCell;
 use trouble_host::prelude::{DefaultPacketPool, ExternalController, Runner as BleRunner};
 use {defmt_rtt as _, panic_probe as _};
 
-// Program metadata for `picotool info`.
-// This isn't needed, but it's recomended to have these minimal entries.
-#[unsafe(link_section = ".bi_entries")]
-#[used]
-pub static PICOTOOL_ENTRIES: [embassy_rp::binary_info::EntryAddr; 4] = [
-    embassy_rp::binary_info::rp_cargo_bin_name!(),
-    embassy_rp::binary_info::rp_program_description!(c"WiFi and BLE controlled LED example"),
-    embassy_rp::binary_info::rp_cargo_version!(),
-    embassy_rp::binary_info::rp_program_build_attribute!(),
-];
-
-// Load SSID and WiFi password from environment variables at build time.
+// Load SSID, WiFi password, and Bluetooth device name from environment variables at build time.
 const SSID: &str = env!("SSID");
 const PASSWORD: &str = env!("PASSWORD");
+const BLE_NAME: &str = env!("BLE_NAME");
+// BLE advertisement packets are limited to 31 bytes; our payload leaves 22 bytes for the name.
+const _: () = assert!(BLE_NAME.as_bytes().len() <= 22);
 
+// How many concurrent requests can we handle?
 const WEB_TASK_POOL_SIZE: usize = 8;
 const NET_STACK_RESOURCES: usize = WEB_TASK_POOL_SIZE + 3;
 
@@ -76,25 +68,25 @@ async fn run_network(mut runner: embassy_net::Runner<'static, NetDriver<'static>
 pub(crate) struct PrintIpRunner {
     network_stack: embassy_net::Stack<'static>,
 }
-
 impl PrintIpRunner {
     pub(crate) async fn run(self) {
+        // Wait for the network to connect to _something_.
         while !self.network_stack.is_link_up() {
             Timer::after(Duration::from_millis(500)).await;
         }
 
+        // Now wait for DHCP to happen so the Pico 2 gets assigned an IP.
         info!("Waiting to get IP address...");
-        loop {
-            if let Some(config) = self.network_stack.config_v4() {
-                let address = config.address.address().octets();
-                info!(
-                    "Got IP: {}.{}.{}.{}",
-                    address[0], address[1], address[2], address[3]
-                );
-                break;
-            }
-            Timer::after(Duration::from_millis(500)).await;
-        }
+        self.network_stack.wait_config_up().await;
+        let config = self
+            .network_stack
+            .config_v4()
+            .expect("we can only do V4 and just waited for a config to be available");
+        let address = config.address.address().octets();
+        info!(
+            "Got IP: {}.{}.{}.{}",
+            address[0], address[1], address[2], address[3]
+        );
     }
 }
 
@@ -107,7 +99,7 @@ async fn run_print_ip(runner: PrintIpRunner) {
 /// Task driving the LED.
 #[embassy_executor::task]
 async fn run_led_controller(runner: LedControllerRunner) {
-    runner.run().await.expect("Infallible");
+    runner.run().await
 }
 
 /// Task running the webserver.
@@ -132,6 +124,7 @@ async fn run_ble_connection(runner: BleConnectionRunner) {
 
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
+    // Get access to the pin(s) we need, and also the peripherals for the emulated PIO SPI bus.
     let Peripherals {
         PIN_18,
         PIN_19,
@@ -145,13 +138,13 @@ async fn main(spawner: Spawner) {
         DMA_CH1,
         ..
     } = embassy_rp::init(Default::default());
-    let mut rng = RoscRng;
+
     let fw = aligned_bytes!("../../../cyw43-firmware/43439A0.bin");
     let clm = aligned_bytes!("../../../cyw43-firmware/43439A0_clm.bin");
     let btfw = aligned_bytes!("../../../cyw43-firmware/43439A0_btfw.bin");
     let nvram = aligned_bytes!("../../../cyw43-firmware/nvram_rp2040.bin");
 
-    let cyw43_power = Output::new(PIN_23, Level::Low);
+    // Set up communication with the WiFi chip.
     let cyw43_chip_select = Output::new(PIN_25, Level::High);
     let mut pio = Pio::new(PIO0, Irqs);
     // Embassy git (post-0.10.0): `PioSpi` uses separate TX and RX DMA channels.
@@ -166,32 +159,28 @@ async fn main(spawner: Spawner) {
         dma::Channel::new(DMA_CH0, Irqs),
         dma::Channel::new(DMA_CH1, Irqs),
     );
-
-    let (led_controller_runner, watch) = led_controller::initialize(PIN_18, PIN_19, PIN_20);
-
     info!("Initializing CYW43");
-
-    static STATE: StaticCell<cyw43::State> = StaticCell::new();
-    let state = STATE.init(cyw43::State::new());
+    let state = mk_static!(cyw43::State, cyw43::State::new());
+    let cyw43_power = Output::new(PIN_23, Level::Low);
     let (network_device, bluetooth_driver, mut control, runner) =
         cyw43::new_with_bluetooth(state, cyw43_power, spi, fw, btfw, nvram).await;
 
-    // The CYW43 must be operable when we create the network stack, so we have to spawn its task before doing so.
+    // The CYW43 must be operable when we create the network stack, so we have
+    // to spawn its task before doing so.
     info!("Spawning CYW43 task");
     spawner.spawn(unwrap!(cyw43_task(runner)));
     info!("Spawned CYW43 task");
 
+    // Continue initializing
     control.init(clm).await;
     control
         .set_power_management(cyw43::PowerManagementMode::PowerSave)
         .await;
-
     info!("Initialized CYW43");
 
+    // Next layer: the `embassy_net` stack
     info!("Creating network stack");
-
     let network_config = embassy_net::Config::dhcpv4(Default::default());
-    let seed = rng.next_u64();
     let (network_stack, network_runner) = embassy_net::new(
         network_device,
         network_config,
@@ -199,22 +188,30 @@ async fn main(spawner: Spawner) {
             StackResources<{ NET_STACK_RESOURCES }>,
             StackResources::new()
         ),
-        seed,
+        RoscRng.next_u64(),
     );
-
     let print_ip_runner = PrintIpRunner { network_stack };
-
     info!("Created network stack");
 
+    // Now our tasks:
+    info!("Initializing LED controller");
+    let (led_controller_runner, watch) = led_controller::initialize(PIN_18, PIN_19, PIN_20);
+
+    info!("Initializing BLE");
     let Ble {
         ble_runner,
         connection_runner: ble_connection_runner,
-    } = ble::initialize(bluetooth_driver, watch.sender(), watch.receiver().unwrap());
+    } = ble::initialize(
+        bluetooth_driver,
+        watch.sender(),
+        watch.receiver().unwrap(),
+        BLE_NAME,
+    );
 
+    info!("Initializing web server");
     let mut webserver_task_factory = webserver::initialize(network_stack, watch.sender());
 
     info!("Spawning tasks");
-
     spawner.spawn(unwrap!(run_led_controller(led_controller_runner)));
     spawner.spawn(unwrap!(run_network(network_runner)));
     spawner.spawn(unwrap!(run_print_ip(print_ip_runner)));
@@ -226,18 +223,17 @@ async fn main(spawner: Spawner) {
 
     spawner.spawn(unwrap!(run_ble(ble_runner)));
     spawner.spawn(unwrap!(run_ble_connection(ble_connection_runner)));
-
     info!("Tasks spawned");
 
+    // Finally, connect to the local WiFi once everything is running.
     info!("Joining network");
-
     control
         .join(SSID, JoinOptions::new(PASSWORD.as_bytes()))
         .await
         .unwrap();
-
     info!("Joined network");
 
+    // Not much to do in `main` anymore, since all of the networking stuff runs through the stack.
     loop {
         Timer::after(Duration::from_secs(5)).await;
     }

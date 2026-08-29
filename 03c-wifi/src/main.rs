@@ -8,10 +8,13 @@ mod led_controller;
 mod mk_static;
 mod webserver;
 
-use crate::{led_controller::LedControllerRunner, webserver::WebserverRunner};
+use crate::{
+    led_controller::{ColorWatch, LedControllerRunner},
+    webserver::{WebserverRunner, WebserverRunnerFactory},
+};
 use cyw43::{JoinOptions, NetDriver, SpiBus, aligned_bytes};
 use cyw43_pio::{PioSpi, RM2_CLOCK_DIVIDER};
-use defmt::*;
+use defmt::info;
 use embassy_executor::Spawner;
 use embassy_net::StackResources;
 use embassy_rp::{
@@ -114,9 +117,9 @@ async fn main(spawner: Spawner) {
         ..
     } = embassy_rp::init(Default::default());
 
-    let fw = aligned_bytes!("../../../cyw43-firmware/43439A0.bin");
-    let clm = aligned_bytes!("../../../cyw43-firmware/43439A0_clm.bin");
-    let nvram = aligned_bytes!("../../../cyw43-firmware/nvram_rp2040.bin");
+    let fw = aligned_bytes!("../../cyw43-firmware/43439A0.bin");
+    let clm = aligned_bytes!("../../cyw43-firmware/43439A0_clm.bin");
+    let nvram = aligned_bytes!("../../cyw43-firmware/nvram_rp2040.bin");
 
     // Set up communication with the WiFi chip.
     let cyw43_chip_select = Output::new(PIN_25, Level::High);
@@ -140,7 +143,7 @@ async fn main(spawner: Spawner) {
     // The CYW43 must be operable when we create the network stack, so we have to spawn its task
     // before doing so.
     info!("Spawning CYW43 task");
-    spawner.spawn(unwrap!(cyw43_task(cyw43_runner)));
+    spawner.spawn(defmt::unwrap!(cyw43_task(cyw43_runner)));
 
     // Continue initializing
     control.init(clm).await;
@@ -166,33 +169,32 @@ async fn main(spawner: Spawner) {
 
     // Now our tasks:
     info!("Initializing LED controller");
-    let (led_controller_runner, watch) = led_controller::initialize(PIN_18, PIN_19, PIN_20);
+    let (led_controller_runner, watch): (LedControllerRunner, &'static ColorWatch) =
+        todo!("Initialize LED controller");
 
     info!("Initializing web server");
-    let mut webserver_task_factory = webserver::initialize(network_stack, watch.sender());
+    let mut webserver_task_factory: WebserverRunnerFactory = todo!("Initialize the webserver");
 
     info!("Spawning tasks");
-    spawner.spawn(unwrap!(run_print_ip(print_ip_runner)));
-    spawner.spawn(unwrap!(run_led_controller(led_controller_runner)));
-    spawner.spawn(unwrap!(run_network(network_runner)));
+    spawner.spawn(defmt::unwrap!(run_print_ip(print_ip_runner)));
+    spawner.spawn(defmt::unwrap!(run_led_controller(led_controller_runner)));
+    spawner.spawn(defmt::unwrap!(run_network(network_runner)));
 
     // Note that we are running multiple tasks for handling requests to the webserver!
     for _ in 0..WEB_TASK_POOL_SIZE {
-        spawner.spawn(unwrap!(run_webserver(webserver_task_factory.new_runner())));
+        spawner.spawn(defmt::unwrap!(run_webserver(
+            webserver_task_factory.new_runner()
+        )));
     }
     info!("Tasks spawned");
 
     // Finally, connect to the local WiFi once everything is running.
     info!("Joining network");
-    control
-        .join(SSID, JoinOptions::new(PASSWORD.as_bytes()))
-        .await
-        .unwrap();
+    todo!("Actually join WiFi network");
     info!("Joined network");
 
     // Not much to do in `main` anymore, since all of the networking stuff runs through the stack.
     loop {
         Timer::after(Duration::from_secs(5)).await;
-        info!("Hello from main!");
     }
 }

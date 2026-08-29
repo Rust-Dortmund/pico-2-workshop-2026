@@ -50,6 +50,7 @@ struct LedService {
 
 /// Runner handling the BLE connection.
 pub(crate) struct BleConnectionRunner {
+    device_name: &'static str,
     peripheral: Peripheral<'static, ExternalController<BtDriver<'static>, 10>, DefaultPacketPool>,
     sender: ColorSender<2>,
     receiver: ColorReceiver<2>,
@@ -258,7 +259,7 @@ impl BleConnectionRunner {
     pub(crate) async fn run(mut self) {
         info!("Starting advertising and GATT service");
         loop {
-            match Self::advertise("LED Trouble", &mut self.peripheral, &self.server).await {
+            match Self::advertise(self.device_name, &mut self.peripheral, &self.server).await {
                 Ok(connection) => {
                     // Set up tasks when the connection is established to a central, so they don't run when no one is connected.
                     let gatt_events_task =
@@ -292,6 +293,7 @@ pub(crate) fn initialize(
     bluetooth_driver: BtDriver<'static>,
     sender: ColorSender<2>,
     receiver: ColorReceiver<2>,
+    device_name: &'static str,
 ) -> Ble {
     let ble_controller: ExternalController<_, 10> = ExternalController::new(bluetooth_driver);
 
@@ -308,12 +310,13 @@ pub(crate) fn initialize(
     let peripheral = stack.peripheral();
 
     let server = Server::new_with_config(GapConfig::Peripheral(PeripheralConfig {
-        name: "LED TrouBLE",
+        name: device_name,
         appearance: &appearance::light_source::LED_LAMP,
     }))
     .unwrap();
 
     let connection_runner = BleConnectionRunner {
+        device_name,
         peripheral,
         sender,
         receiver,

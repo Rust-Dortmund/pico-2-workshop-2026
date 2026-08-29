@@ -132,7 +132,6 @@ When you now run your program, you should see some log output like this:
 4.294398 [INFO ] Joined network 
 4.745652 [INFO ] Waiting to get IP address... 
 7.309739 [INFO ] Got IP: 192.168.92.85 
-9.294448 [INFO ] Hello from main! 
 ```
 
 If you don't see the IP address being printed, try running the program again (it's possible that we'll struggle with the workshop WiFi).
