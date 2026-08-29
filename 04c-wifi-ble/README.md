@@ -116,7 +116,7 @@ There are many specific profiles that the Bluetooth group has defined over the y
 
 One particularly important profile which we will make use of today is called the "Generic Attribute Profile", or GATT, for short.
 As the name implies, GATT allows devices to freely define values and advertise them to other devices connecting to them through a dynamic discovery mechanism instead of a static, pre-defined list of specific values that have to be provided.
-The GATT protocol then layers on a client-server model for reading and writing to such "attributes" through generic endpoints that operate on generic ID representations of the attributes.
+The GATT protocol then layers on a client-server model for reading and writing to such "attributes" through generic endpoints that operate on generic ID representations of the attributes that are called **handles**.
 
 In GATT terms, a **client** (like your phone) connects to a **server** (like the Pico 2) and sends it GATT commands and requests.
 The server receives and processes them and returns a response.
@@ -190,42 +190,196 @@ Then, initialize the Bluetooth stack from `main` by fixing the `todo!` about cal
 
 <summary>Hint</summary>
 
-You may also need to generalize the `LedControllerRunner` and adjust a few callsites.
+You may also need to generalize the `LedControllerRunner` and `BleConnectionRunner` and adjust a few callsites.
 
 </details>
 
 ### GATT Service Definition
 
-Create a GATT service with a single `u8` characteristic for the LED color.
+Annotate the `LedService` type to create a GATT service with a single `u8` characteristic for the LED color.
+The characteristic should be readable, writable and support notifications.
+Then, provide the LED service as the single service of our `ble::Server`.
 
-UUID should be:
-
-- readable
-- writable
-- support notifications
-
-Initially, the LED will be RED.
+Remember that, initially, the LED will be RED.
 Your definition should include a name for the characteristic, as well as the range of valid values.
+Give the service the ID `0x180A` and the color characteristic the ID `0x2A57`.
 
 > [!TIP]
 > You can find the TrouBLE documentation on GATT services [here](https://embassy.dev/trouble/#_defining_services).
 
+<details>
+
+<summary>Hint 1</summary>
+
+Have a look at the `#[characteristic]` and `#[descriptor]` annotations from TrouBLE.
+
+</details>
+
+<details>
+
+<summary>Hint 2</summary>
+
+Set the characteristic to `0` initially to match the starting LED color.
+
+</details>
+
+<details>
+
+<summary>Hint 3</summary>
+
+You will need the `VALID_RANGE` and `MEASUREMENT_DESCRIPTION` characteristics.
+For the description, supply `type = &'static str` to fix the value type.
+
+</details>
 
 ### Advertisements
 
-- Flags
-  - Generally discoverable (will remain discoverable even if no one connects)
-  - BR and EDR not supported
-- Service UUIDs 
-- Name
+Next up, now that we have a BLE service, we need to advertise it and accept incoming connections from devices who have received those advertisements.
+To do so, complete the `advertise` function on `BleConnectionRunner` by
 
-Allow connect and scan.
+1. Creating an [advertisement data packet](#packet-format) containing the following items and encoding it into the `advertiser_data` buffer:
+   1. The "generally discoverable" and "BR and EDR not supported" flags to indicate that the device will keep advertising even if no one connects, but only supports BLE.
+   2. The list of services the device provides (note that the [byte order](https://en.wikipedia.org/wiki/Endianness) in BLE is little-endian, meaning the lower byte goes first).
+   3. The provided device name.
+2. Building an advertisement of the correct type containing the `advertiser_data` (note: you can pass an empty `scan_data` slice if required). The device should allow other devices to connect and scan it.
+3. Having the `peripheral` broadcast that advertisement.
+4. Accepting incoming connections and providing our GATT `server` to them.
+
+<details>
+
+<summary>Hint 1</summary>
+
+The TrouBLE type to look at for advertisement data and its encoding is `AdStructure`.
+
+</details>
+
+<details>
+
+<summary>Hint 2</summary>
+
+The correct advertisement type to use is `Advertisement::ConnectableScannableUndirected`.
+
+</details>
+
+<details>
+
+<summary>Hint 3</summary>
+
+For advertising, have a look at the `advertise` method on `Peripheral`.
+
+</details>
+
+<details>
+
+<summary>Hint 4</summary>
+
+Have a look for methods on `Connection` that transform it into the `GattConnection` type to be returned.
+
+</details>
+
+> [!NOTE]
+> At this point, you should be able to flash and run your code and use [your client](#testing-over-bluetooth) to scan for your Pico.
+> It should show up in the list of devices and allow you to connect, but won't yet display any actual values.
 
 ### Handling GATT Reads
 
+After establishing a connection, we need to allow the central device to read the LED color. 
+In GATT, a request to read a characteristic is indicated by a `ReadEvent`, which we handle in `handle_gatt_read`.
+There are four things you need to do to complete the event handler:
+
+1. Check whether the request is actually for the LED color value, which you can do by accessing the characteristic through the `server`.
+2. If so, read out the value.
+3. Accept the event, which constructs the BLE response for the central device. 
+4. Send the response.
+
+<details>
+
+<summary>Hint 1</summary>
+
+To compare values, compare the attribute **handles** of the event and our characteristic.
+
+</details>
+
+<details>
+
+<summary>Hint 2</summary>
+
+Have a look at the available methods on our `server` that might be suitable for reading values.
+
+</details>
+
 ### Handling GATT Writes
 
+Your next task is to implement the same thing for GATT writes to allow changing the LED color via BLE.
+This works roughly the same as for reads, except that 
+
+1. There is now incoming data associated with the event which we need to map back to an LED color,
+2. We might need to reject the event instead of accepting it if the requested `u8` value doesn't exist as a color, and
+3. You need to forward correct color requests to the LED runner.
+
+Implement the write functionality in `handle_gatt_write`.
+
+> [!NOTE]
+> You can try out the new functionality by sending a write request from your client.
+
+<details>
+
+<summary>Hint 1</summary>
+
+You can use `WriteEvent::with_data` to access the write payload.
+The first parameter passed to the closure is a byte offset and will always be 0.
+The second parameter is the actual data, which you can match on.
+
+</details>
+
+<details>
+
+<summary>Hint 2</summary>
+
+Transmit valid color requests via the provided `sender`.
+
+</details>
+
+<details>
+
+<summary>Hint 3</summary>
+
+The correct error code to use is `AttErrorCode::OUT_OF_RANGE`.
+Even if you reject the event, you will still need to send a (negative) response.
+
+</details>
+
 ### Notifications
+
+Lastly, we're going to enable the peripheral to send change notifications to the central.
+Since the LED color may change independently from BLE requests (e.g., via the HTTP API), this functionality runs as a separate `notify_task` which you need to implement.
+
+The notify task actually has two distinct functions:
+
+1. Sending the color value at the time of connection once to provide an initial value to the client (even if the LED does not yet change).
+2. Sending updates whenever the color is modified.
+
+Both of these can be accomplished through the same notification API, which you can find on the characteristic, but one needs to run continuously while the other only runs once at the start of the connection.
+
+> [!TIP]
+> Use your client to subscribe to notifications.
+
+## What's Next
+
+Congratulations!
+You've made it to the end of the connectivity path.
+
+If this was the first path you completed, you can switch to the sensing path to learn more about connecting the Pico 2 to other sensors and performing gesture detection - to do so, start [here](../03s-sun-detector/README.md).
+Otherwise, or if you prefer to not do more structured learning today, you are free to poke at the APDS-9960, further explore the connectivity features of the Pico 2 or whatever else you want to take a peek at.
+If you want some ideas for what you can achieve with just the equipment you have, then for example you could
+
+- Have WiFi and Bluetooth control different aspects of the LED (such as color vs. brightness)
+  - Or, if you've done the sensing path, color vs. operating mode or color vs. threshold for distance, gesture detection, etc.
+- Learn about Bluetooth security and add authentication for Bluetooth pairing (small tip: while we haven't provided you with any display or buttons, `defmt` log output can be a form of display too...)
+- Explore the predefined set of GATT services / profiles. For example, try to build a HID (human interface device) such as a game controller reacting to gestures.
+
+However you decide: We hope that you had a great experience and enjoyed the workshop so far, we are happy to have you here!
+We also appreciate feedback, just talk to us!
 
 ## Testing over Bluetooth
 
@@ -364,19 +518,3 @@ Ensure the Bluetooth service is running (for example, `bluetoothctl show` should
 Your user account typically needs permission to talk to BlueZ; on many distributions this means being a member of the `bluetooth` group, followed by logging out and back in.
 If you use the AppImage, make it executable (`chmod +x toolBLEx-*.AppImage`) before running it.
 
-## What's Next
-
-Congratulations!
-You've made it to the end of the connectivity path.
-
-If this was the first path you completed, you can switch to the sensing path to learn more about connecting the Pico 2 to other sensors and performing gesture detection - to do so, start [here](../03s-sun-detector/README.md).
-Otherwise, or if you prefer to not do more structured learning today, you are free to poke at the APDS-9960, further explore the connectivity features of the Pico 2 or whatever else you want to take a peek at.
-If you want some ideas for what you can achieve with just the equipment you have, then for example you could
-
-- Have WiFi and Bluetooth control different aspects of the LED (such as color vs. brightness)
-  - Or, if you've done the sensing path, color vs. operating mode or color vs. threshold for distance, gesture detection, etc.
-- Learn about Bluetooth security and add authentication for Bluetooth pairing (small tip: while we haven't provided you with any display or buttons, `defmt` log output can be a form of display too...)
-- Explore the predefined set of GATT services / profiles. For example, try to build a HID (human interface device) such as a game controller reacting to gestures.
-
-However you decide: We hope that you had a great experience and enjoyed the workshop so far, we are happy to have you here!
-We also appreciate feedback, just talk to us!
