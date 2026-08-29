@@ -141,11 +141,7 @@ Download the latest release for your operating system from the project's GitHub 
 - **macOS:** `toolBLEx-*-macOS.zip`
 - **Linux:** `toolBLEx-*-linux64.AppImage` (or `.tar.gz`)
 
-No extra hardware is required, only a laptop with a working Bluetooth adapter (if your laptop doesn't have bluetooth and you also don't have an adapter, you can try using [your phone with a mobile app](#alternative-clients) instead).
-
-> [!TIP]
-> If you prefer using a terminal tool, you can find some under [alternatives](#alternative-clients) as well.
-
+No extra hardware is required, only a laptop with a working Bluetooth adapter.
 Before the exercise, open toolBLEx once and start a scan to confirm that your laptop can see nearby BLE devices.
 If the app reports a problem, fix your host Bluetooth setup first (see the troubleshooting section below).
 
