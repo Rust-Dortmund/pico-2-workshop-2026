@@ -29,22 +29,14 @@ impl From<Color> for u8 {
 /// GATT server offering a single service: Interacting with the LED color.
 #[gatt_server]
 struct Server {
-    led_service: LedService,
+    // TODO: Provide an LED service.
 }
 
 /// GATT service providing capabilities to read and set the LED color.
 ///
 /// As there is no standard UUID for "tri-color RGB LEDs" defined, we use one without a standard meaning.
-#[gatt_service(uuid = BluetoothUuid16::new(0x180a))]
 struct LedService {
-    /// Characteristic of the GATT service setting the actual color.
-    ///
-    /// Note that we define some descriptor that provide metadata about the characteristic.
-    ///
-    /// Again, there is no standard cahracteristic defined, so we use one without a standard meaning.
-    #[descriptor(uuid = descriptors::VALID_RANGE, read, value = [0, 2])]
-    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "color", read, value = "LED Color", type = &'static str)]
-    #[characteristic(uuid = BluetoothUuid16::new(0x2a57), read, write, notify, value = 0)]
+    // TODO: Complete me!
     color: u8,
 }
 
@@ -52,8 +44,8 @@ struct LedService {
 pub(crate) struct BleConnectionRunner {
     device_name: &'static str,
     peripheral: Peripheral<'static, ExternalController<BtDriver<'static>, 10>, DefaultPacketPool>,
-    sender: ColorSender<2>,
-    receiver: ColorReceiver<2>,
+    sender: ColorSender,
+    receiver: ColorReceiver,
     server: Server<'static>,
 }
 
@@ -67,25 +59,11 @@ impl BleConnectionRunner {
         server: &'server Server<'values>,
     ) -> Result<GattConnection<'values, 'server, DefaultPacketPool>, BleHostError<C::Error>> {
         let mut advertiser_data = [0; 31];
-        let len = AdStructure::encode_slice(
-            &[
-                AdStructure::Flags(LE_GENERAL_DISCOVERABLE | BR_EDR_NOT_SUPPORTED),
-                AdStructure::CompleteServiceUuids16(&[[0x0a, 0x18]]),
-                AdStructure::CompleteLocalName(name.as_bytes()),
-            ],
-            &mut advertiser_data[..],
-        )?;
-        let advertiser = peripheral
-            .advertise(
-                &Default::default(),
-                Advertisement::ConnectableScannableUndirected {
-                    adv_data: &advertiser_data[..len],
-                    scan_data: &[],
-                },
-            )
-            .await?;
+        let len = todo!("create and encode advertising data");
+        let advertisement = todo!("construct advertisement with correct type");
+        let advertiser = todo!("send advertisement");
         info!("[adv] advertising");
-        let conn = advertiser.accept().await?.with_attribute_server(server)?;
+        let conn = todo!("accept connetion and serve our GATT server");
         info!("[adv] connection established");
         Ok(conn)
     }
@@ -96,20 +74,16 @@ impl BleConnectionRunner {
     ///
     /// This function is cancel safe.
     async fn handle_gatt_read<P: PacketPool>(event: ReadEvent<'_, '_, P>, server: &Server<'_>) {
-        if event.handle() == server.led_service.color.handle {
+        if todo!("event is for LED color") {
             // This is for the `color` characteristic.
 
             // Note that this does nothing but printing the current value! See below for how the value is sent.
-            let value = server.get(&server.led_service.color);
-            info!("[gatt] Read Event to Color Characteristic: {:?}", value);
+            let value = todo!("read value");
+            // info!("[gatt] Read Event to Color Characteristic: {:?}", value);
         }
 
         // Accepting and then sending the read event queries the currently cached value and returns it over BLE.
-        match event.accept() {
-            // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
-            Ok(reply) => reply.send().await,
-            Err(e) => info!("[gatt] error sending response: {:?}", e),
-        };
+        todo!("accept event and send response");
     }
 
     /// Handles write access to a characteristic in a GATT service.
@@ -120,46 +94,16 @@ impl BleConnectionRunner {
     async fn handle_gatt_write<P: PacketPool>(
         event: WriteEvent<'_, '_, P>,
         server: &Server<'_>,
-        sender: &ColorSender<2>,
+        sender: &ColorSender,
     ) {
-        if event.handle() == server.led_service.color.handle {
-            let accepted = event.with_data(|_offset, data| {
-                info!("[gatt] Write Event to Level Characteristic: {:?}", data);
-
-                match data {
-                    [COLOR_RED] => {
-                        sender.send(Color::Red);
-                        true
-                    }
-                    [COLOR_GREEN] => {
-                        sender.send(Color::Green);
-                        true
-                    }
-                    [COLOR_BLUE] => {
-                        sender.send(Color::Blue);
-                        true
-                    }
-                    _ => false,
-                }
-            });
-
-            if accepted {
-                match event.accept(){
-                    // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
-                    Ok(reply) => reply.send().await,
-                    Err(e) => {
-                        info!("[gatt] error sending response: {:?}", e)
-                    }
-                }
-            } else {
-                match event.reject(AttErrorCode::OUT_OF_RANGE) {
-                    // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
-                    Ok(reply) => reply.send().await,
-                    Err(e) => {
-                        info!("[gatt] error sending response: {:?}", e)
-                    }
-                }
+        todo!("check event target");
+        let requested_color: Option<Color> = todo!("inspect and validate event");
+        match requested_color {
+            Some(color) => {
+                todo!("change LED color");
+                todo!("send response");
             }
+            None => todo!("reject"),
         }
     }
 
@@ -174,7 +118,7 @@ impl BleConnectionRunner {
     async fn gatt_events_task<P: PacketPool>(
         server: &Server<'_>,
         connection: &GattConnection<'_, '_, P>,
-        sender: &ColorSender<2>,
+        sender: &ColorSender,
     ) -> Result<(), trouble_host::prelude::Error> {
         let reason = loop {
             // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
@@ -212,38 +156,15 @@ impl BleConnectionRunner {
     async fn notify_task<P: PacketPool>(
         server: &Server<'_>,
         connection: &GattConnection<'_, '_, P>,
-        receiver: &mut ColorReceiver<2>,
+        receiver: &mut ColorReceiver,
     ) {
-        // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
-        if let Some(new_color) = receiver.try_get()
-            && server
-                .led_service
-                .color
-                .notify(connection, &u8::from(new_color), true)
-                .await
-                .is_err()
-        {
+        // TODO: Get current color and notify client about it
+        if false { // TODO: check for failure
             info!("[notify_task] error notifying connection");
             return;
         }
 
-        loop {
-            // CANCELLATION SAFETY: `embassy_sync::watch::Receiver::changed` is not documented as being cancel safe, but
-            // should be according to [this comment](https://github.com/embassy-rs/embassy/issues/5484#issuecomment-3921041927).
-            // Also see [this issue](https://github.com/embassy-rs/embassy/issues/5796).
-            let new_color: u8 = receiver.changed().await.into();
-            // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
-            if server
-                .led_service
-                .color
-                .notify(connection, &new_color, true)
-                .await
-                .is_err()
-            {
-                info!("[notify_task] error notifying connection");
-                break;
-            }
-        }
+        // TODO: When the LED color changes, notify the client
     }
 
     pub(crate) async fn run(mut self) {
@@ -281,8 +202,8 @@ pub(crate) struct Ble {
 /// Initializes BLE connectivity and returns the runners that need to be polled (e.g. in tasks).
 pub(crate) fn initialize(
     bluetooth_driver: BtDriver<'static>,
-    sender: ColorSender<2>,
-    receiver: ColorReceiver<2>,
+    sender: ColorSender,
+    receiver: ColorReceiver,
     device_name: &'static str,
 ) -> Ble {
     let ble_controller: ExternalController<_, 10> = ExternalController::new(bluetooth_driver);

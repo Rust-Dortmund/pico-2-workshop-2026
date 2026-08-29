@@ -112,21 +112,6 @@ impl BleConnectionRunner {
         };
     }
 
-    /// Accepts a [`WriteEvent`] to a characteristic in a GATT service.
-    ///
-    /// # Cancellation safety
-    ///
-    /// This function is cancel safe.
-    async fn accept_write_event<P: PacketPool>(event: WriteEvent<'_, '_, P>) {
-        match event.accept() {
-            // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
-            Ok(reply) => reply.send().await,
-            Err(e) => {
-                info!("[gatt] error sending response: {:?}", e)
-            }
-        }
-    }
-
     /// Handles write access to a characteristic in a GATT service.
     ///
     /// # Cancellation safety
@@ -137,37 +122,41 @@ impl BleConnectionRunner {
         server: &Server<'_>,
         sender: &ColorSender<2>,
     ) {
-        if event.handle() == server.led_service.color.handle {
-            let accepted = event.with_data(|_offset, data| {
-                info!("[gatt] Write Event to Level Characteristic: {:?}", data);
+        if event.handle() != server.led_service.color.handle {
+            return;
+        }
+        let requested_color = event.with_data(|_offset, data| {
+            info!("[gatt] Write Event to Level Characteristic: {:?}", data);
 
-                match data {
-                    [COLOR_RED] => {
-                        sender.send(Color::Red);
-                        true
-                    }
-                    [COLOR_GREEN] => {
-                        sender.send(Color::Green);
-                        true
-                    }
-                    [COLOR_BLUE] => {
-                        sender.send(Color::Blue);
-                        true
-                    }
-                    _ => false,
+            match data {
+                [COLOR_RED] => {
+                    Some(Color::Red)
                 }
-            });
-
-            if accepted {
-                // CANCELLATION SAFETY: Documented as being cancel safe.
-                Self::accept_write_event(event).await;
-            } else {
-                match event.reject(AttErrorCode::OUT_OF_RANGE) {
+                [COLOR_GREEN] => {
+                    Some(Color::Green)
+                }
+                [COLOR_BLUE] => {
+                    Some(Color::Blue)
+                }
+                _ => None,
+            }
+        });
+        match requested_color {
+            Some(color) => {
+                sender.send(color);
+                match event.accept(){
                     // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
                     Ok(reply) => reply.send().await,
                     Err(e) => {
                         info!("[gatt] error sending response: {:?}", e)
                     }
+                }
+            }
+            None => match event.reject(AttErrorCode::OUT_OF_RANGE) {
+                // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
+                Ok(reply) => reply.send().await,
+                Err(e) => {
+                    info!("[gatt] error sending response: {:?}", e)
                 }
             }
         }
