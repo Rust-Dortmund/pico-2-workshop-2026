@@ -237,7 +237,7 @@ For the description, supply `type = &'static str` to fix the value type.
 Next up, now that we have a BLE service, we need to advertise it and accept incoming connections from devices who have received those advertisements.
 To do so, complete the `advertise` function on `BleConnectionRunner` by
 
-1. Creating an [advertisement data packet](#packet-format) containing the following items and encoding it into the `advertiser_data` buffer:
+1. Creating an [advertisement data packet](#packet-format) containing the following items and encoding it into the `advertiser_data` buffer (hint: look for advertising-related types in the [`trouble_host` docs](https://docs.embassy.dev/trouble-host/git/default/index.html)):
    1. The "generally discoverable" and "BR and EDR not supported" flags to indicate that the device will keep advertising even if no one connects, but only supports BLE.
    2. The list of services the device provides (note that the [byte order](https://en.wikipedia.org/wiki/Endianness) in BLE is little-endian, meaning the lower byte goes first).
    3. The provided device name.
