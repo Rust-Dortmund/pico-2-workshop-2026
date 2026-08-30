@@ -163,7 +163,7 @@ async fn main(spawner: Spawner) {
     let state = mk_static!(cyw43::State, cyw43::State::new());
     let cyw43_power = Output::new(PIN_23, Level::Low);
     // Gain access to the bluetooth driver by switching to `new_with_bluetooth`,
-    // which requires passing the bluetooth firmware in addition to WiFi.
+    // which requires passing the bluetooth firmware in addition to the WiFi firmware.
     let (network_device, bluetooth_driver, mut control, runner) =
         cyw43::new_with_bluetooth(state, cyw43_power, spi, fw, btfw, nvram).await;
 

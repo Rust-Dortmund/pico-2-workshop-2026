@@ -18,13 +18,13 @@ In the terms of the frameworks we will be using today, what we typically think o
 Even the original Bluetooth protocol already concerned itself with the energy consumption of Bluetooth devices, but generally expected devices to be continuously connected to each other and exchange data, as is the case with devices like headsets, wireless mice or keyboards, or other devices where the Bluetooth functionality primarily removes the need for them to be wired.
 With the advent of ever smaller devices this was no longer sufficient, as they rarely have the need to continuously stream data, and have to consume even less power, especially if they are battery-powered.
 Examples for this category are smartwatches, health / fitness trackers, smart home sensors, locks, and tracking beacons ("tags"). 
-This led to the development of a new Bluetooth protocol by Nokia in 2004, originally called Wibree, which first became part of the official Bluetooth standard in 2010 with Bluetooth version 4.0 as "Bluetooth Smart" and later got renamed to "Bluetooth Low Energy" ("BLE").
+This led to the development of "Bluetooth Low Energy" ("BLE") as a new Bluetooth protocol focused on energy efficiency.
 
-Bluetooth LE uses the same radio frequencies as "classic" Bluetooth, which you will see in the code as Bluetooth BR ("basic rate") or EDR ("extended data rate"), and can run side-by-side with it.
+BLE uses the same radio frequencies as "classic" Bluetooth, which you will see in the code as Bluetooth BR ("basic rate") or EDR ("extended data rate"), and can run side-by-side with it.
 However, not all devices have to support both and we will only be working with BLE today.
 BLE achieves lower power consumption by two primary means:
-Firstly, BLE devices don't need to stay continuously connected all the time and can spend a lot of their time sleeping between data exchanges.
-Secondly, BLE data can be broadcast without requiring a peer-to-peer connection to exist at all.
+First, BLE devices don't need to maintain direct connections to their peers continuously and can spend a lot of their time sleeping between data exchanges.
+Second, BLE data can be broadcast without requiring a peer-to-peer connection to exist at all.
 In cases where a direct connection has to be established, BLE also allows such a connection to be established faster because only a subset of the overall frequency range is used for this purpose.
 
 ### Host Controller Interface
@@ -56,7 +56,7 @@ A BLE packet usually contains a small header including an address, a data payloa
 
 The preamble is a fixed bit pattern that devices can check for to quickly find where a packet starts.
 For each pair of devices or broadcast, a unique address is used for all packets that are part of that connection.
-Note that this is different from something like a physical / MAC address, which belongs to a distinc device and would be the same for all of this device's connections - here, the address identifies the communication channel between both devices, but the same devices will send packets with different addresses when communicating with other peers.
+Note that this is different from something like a physical / MAC address, which belongs to a distinct device and would be the same for all of this device's connections - here, the address identifies the communication channel between both devices, but the same devices will send packets with different addresses when communicating with other peers.
 The PDU, then, contains any dynamic data that might be different between one packet and the next.
 
 Different types of packets have different PDUs.
