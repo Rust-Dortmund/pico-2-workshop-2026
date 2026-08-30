@@ -204,12 +204,9 @@ Once you are done, test whether you can cycle through the LED's states by waving
 Congratulations!
 You made it to the end of the sensing path.
 
-From here on you have multiple options for proceeding:
-
-- Try out the connectivity path to learn about WiFi and BLE or
-- proceed poking at the APDS-9960.
-
-If you want to continue learning about the APDS-9960 past the workshop exercises then we have some ideas on what you could do:
+If this was the first path you completed, you can switch to the connectivity path to learn more about wirelessly interacting with the Pico 2 - to do so, start [here](../03c-wifi/README.md).
+Otherwise, or if you prefer to not do more structured learning today, you are free to poke at the APDS-9960, explore the connectivity features of the Pico 2 on your own or whatever else you want to take a peek at.
+If you want some ideas for what you can achieve with just the equipment you have, then for example you could
 
 - Combine multiple sensor data sources, e.g. only react to gestures close to the sensor.
 - Extend on gesture detection: Have different gestures trigger different behavior. Maybe you can even implement some kind of game?
