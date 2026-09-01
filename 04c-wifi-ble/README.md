@@ -239,7 +239,7 @@ To do so, complete the `advertise` function on `BleConnectionRunner` by
 
 1. Creating an [advertisement data packet](#packet-format) containing the following items and encoding it into the `advertiser_data` buffer (hint: look for advertising-related types in the [`trouble_host` docs](https://docs.embassy.dev/trouble-host/git/default/index.html)):
    1. The "generally discoverable" and "BR and EDR not supported" flags to indicate that the device will keep advertising even if no one connects, but only supports BLE.
-   2. The list of services the device provides (note that the [byte order](https://en.wikipedia.org/wiki/Endianness) in BLE is little-endian, meaning the lower byte goes first).
+   2. The list of services the device provides. This should be a list with a single entry that matches the service UUID of our GATT service from the previous section (note that the [byte order](https://en.wikipedia.org/wiki/Endianness) in BLE is little-endian, meaning the lower byte goes first).
    3. The provided device name.
 2. Building an advertisement of the correct type containing the `advertiser_data` (note: you can pass an empty `scan_data` slice if required). The device should allow other devices to connect and scan it.
 3. Having the `peripheral` broadcast that advertisement.
