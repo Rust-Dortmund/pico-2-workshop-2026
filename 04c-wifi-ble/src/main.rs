@@ -139,10 +139,10 @@ async fn main(spawner: Spawner) {
         ..
     } = embassy_rp::init(Default::default());
 
-    let fw = aligned_bytes!("../../../cyw43-firmware/43439A0.bin");
-    let clm = aligned_bytes!("../../../cyw43-firmware/43439A0_clm.bin");
-    let btfw = aligned_bytes!("../../../cyw43-firmware/43439A0_btfw.bin");
-    let nvram = aligned_bytes!("../../../cyw43-firmware/nvram_rp2040.bin");
+    let fw = aligned_bytes!("../../cyw43-firmware/43439A0.bin");
+    let clm = aligned_bytes!("../../cyw43-firmware/43439A0_clm.bin");
+    let btfw = aligned_bytes!("../../cyw43-firmware/43439A0_btfw.bin");
+    let nvram = aligned_bytes!("../../cyw43-firmware/nvram_rp2040.bin");
 
     // Set up communication with the WiFi chip.
     let cyw43_chip_select = Output::new(PIN_25, Level::High);
@@ -162,6 +162,8 @@ async fn main(spawner: Spawner) {
     info!("Initializing CYW43");
     let state = mk_static!(cyw43::State, cyw43::State::new());
     let cyw43_power = Output::new(PIN_23, Level::Low);
+    // Gain access to the bluetooth driver by switching to `new_with_bluetooth`,
+    // which requires passing the bluetooth firmware in addition to the WiFi firmware.
     let (network_device, bluetooth_driver, mut control, runner) =
         cyw43::new_with_bluetooth(state, cyw43_power, spi, fw, btfw, nvram).await;
 
@@ -201,12 +203,7 @@ async fn main(spawner: Spawner) {
     let Ble {
         ble_runner,
         connection_runner: ble_connection_runner,
-    } = ble::initialize(
-        bluetooth_driver,
-        watch.sender(),
-        watch.receiver().unwrap(),
-        BLE_NAME,
-    );
+    } = todo!("call ble::initialize");
 
     info!("Initializing web server");
     let mut webserver_task_factory = webserver::initialize(network_stack, watch.sender());

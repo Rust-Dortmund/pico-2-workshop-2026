@@ -22,22 +22,23 @@ use crate::{
 //      cooperative and our tasks cannot be interrupted, we use a "no-op" mutex that doesn't
 //      actually do anything to protect against data races. After all, if there's only a single
 //      thread, there's no one else racing!
-//   2. The maximum number of `Receiver`s we want to use at the same time. Since we now have more
-//      than just one receiver, we defer setting this by passing the number through via const generics.
-pub(crate) type ColorWatch<const NUM_RECEIVERS: usize> = Watch<NoopRawMutex, Color, NUM_RECEIVERS>;
-pub(crate) type ColorSender<const NUM_RECEIVERS: usize> =
-    Sender<'static, NoopRawMutex, Color, NUM_RECEIVERS>;
-pub(crate) type ColorReceiver<const NUM_RECEIVERS: usize> =
-    Receiver<'static, NoopRawMutex, Color, NUM_RECEIVERS>;
+//   2. The maximum number of `Receiver`s we want to use at the same time. Since we only want the
+//      `LedControllerRunner` to receive new color values, we only need 1.
+pub(crate) type ColorWatch = Watch<NoopRawMutex, Color, 1>;
+pub(crate) type ColorSender = Sender<'static, NoopRawMutex, Color, 1>;
+pub(crate) type ColorReceiver = Receiver<'static, NoopRawMutex, Color, 1>;
 
-pub(crate) struct Runner<const NUM_RECEIVERS: usize> {
+/// Holds the required state for blinking the LED and changing its color on request.
+pub(crate) struct LedControllerRunner {
     led: TriColorLed,
-    receiver: ColorReceiver<NUM_RECEIVERS>,
+    receiver: ColorReceiver,
 }
 
-impl<const NUM_RECEIVERS: usize> Runner<NUM_RECEIVERS>
-{
+impl LedControllerRunner {
     pub(crate) async fn run(mut self) {
+        // This runner has 2 tasks:
+        //   1. Every 0.5s, make the LED blink on or off.
+        //   2. When a new LED color is requested through the web API, make the color change.
         let mut ticker = Ticker::every(Duration::from_millis(500));
         loop {
             // CANCELLATION SAFETY:
@@ -53,8 +54,6 @@ impl<const NUM_RECEIVERS: usize> Runner<NUM_RECEIVERS>
     }
 }
 
-pub(crate) type LedControllerRunner = Runner<2>;
-
 /// Initializes the LED controller that drives the LED connected to the given pins.
 ///
 /// Returns two things:
@@ -65,18 +64,20 @@ pub(crate) fn initialize(
     red_gpio: Peri<'static, PIN_18>,
     green_gpio: Peri<'static, PIN_19>,
     blue_gpio: Peri<'static, PIN_20>,
-) -> (LedControllerRunner, &'static ColorWatch<2>) {
+) -> (LedControllerRunner, &'static ColorWatch) {
+    // Initialize a `TriColorLed` to work with.
     let red_led = Output::new(red_gpio, Level::Low);
     let green_led = Output::new(green_gpio, Level::Low);
     let blue_led = Output::new(blue_gpio, Level::Low);
     let tri_color_led = TriColorLed::new(red_led, green_led, blue_led);
 
-    let watch = mk_static!(ColorWatch<2>, ColorWatch::new());
-    watch.sender().send(Color::Red);
-
-    let led_controller_runner = Runner {
+    // Create a channel for receiving new color values and store the receiving end inside `Self`.
+    let watch = mk_static!(ColorWatch, ColorWatch::new_with(Color::Red));
+    let led_controller_runner = LedControllerRunner {
         led: tri_color_led,
-        receiver: watch.receiver().unwrap(),
+        receiver: watch
+            .receiver()
+            .expect("we just created the watch channel, so the single receiver is still available"),
     };
 
     (led_controller_runner, watch)
