@@ -32,10 +32,13 @@ struct Server {
     led_service: LedService,
 }
 
+const LED_SERVICE_ID: u128 = 0xf26a8079_996a_4418_8555_92b4b3b744ab;
+const LED_COLOR_UUID: u128 = 0x98666659_8007_46a1_a979_e4fe54a62a5f;
+
 /// GATT service providing capabilities to read and set the LED color.
 ///
 /// As there is no standard UUID for "tri-color RGB LEDs" defined, we use one without a standard meaning.
-#[gatt_service(uuid = BluetoothUuid16::new(0x180a))]
+#[gatt_service(uuid = BluetoothUuid128::new(LED_SERVICE_ID))]
 struct LedService {
     /// Characteristic of the GATT service setting the actual color.
     ///
@@ -44,7 +47,7 @@ struct LedService {
     /// Again, there is no standard cahracteristic defined, so we use one without a standard meaning.
     #[descriptor(uuid = descriptors::VALID_RANGE, read, value = [0, 2])]
     #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "color", read, value = "LED Color", type = &'static str)]
-    #[characteristic(uuid = BluetoothUuid16::new(0x2a57), read, write, notify, value = 0)]
+    #[characteristic(uuid = BluetoothUuid128::new(LED_COLOR_UUID), read, write, notify, value = 0)]
     color: u8,
 }
 
@@ -70,7 +73,7 @@ impl BleConnectionRunner {
         let len = AdStructure::encode_slice(
             &[
                 AdStructure::Flags(LE_GENERAL_DISCOVERABLE | BR_EDR_NOT_SUPPORTED),
-                AdStructure::CompleteServiceUuids16(&[[0x0a, 0x18]]),
+                AdStructure::CompleteServiceUuids128(&[LED_SERVICE_ID.to_le_bytes()]),
                 AdStructure::CompleteLocalName(name.as_bytes()),
             ],
             &mut advertiser_data[..],

@@ -126,8 +126,7 @@ There is also metadata that can be attached to characteristics, such as their al
 Metadata is optional and each piece of metadata is called a **descriptor**.
 
 Characteristics, services and descriptors are all attributes in GATT and each attribute is tagged with a unique ID for reference.
-Usually, full UUIDs are 128 bits, but we'll be using shorter 16-bit IDs which are also supported.
-Some IDs are predefined and are always used for specific purposes.
+Full UUIDs are 128 bits, with shorter 16- and 32-bit IDs reserved for special purposes.
 For example, you will see that the Pico 2 will show a "Generic Access" GATT service, which contains the device name and what is called the "appearance", which in our case will indicate that the device is an LED.
 
 #### Notifications & Indications
@@ -202,7 +201,8 @@ Then, provide the LED service as the single service of our `ble::Server`.
 
 Remember that, initially, the LED will be RED.
 Your definition should include a name for the characteristic, as well as the range of valid values.
-Give the service the ID `0x180A` and the color characteristic the ID `0x2A57`.
+We have pre-generated unique IDs for our LED service and color characteristic which do not conflict with any predefined IDs:
+please set the service UUID to `0xf26a8079_996a_4418_8555_92b4b3b744ab` and the UUID for the color characteristic to `0x98666659_8007_46a1_a979_e4fe54a62a5f`.
 
 > [!TIP]
 > You can find the TrouBLE documentation on GATT services [here](https://embassy.dev/trouble/#_defining_services).

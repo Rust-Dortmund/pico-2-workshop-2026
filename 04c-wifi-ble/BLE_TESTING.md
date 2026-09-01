@@ -17,7 +17,7 @@ To avoid that, before the program will compile you'll need to provide a short un
 This value is used directly as the advertised Bluetooth device name — for example, `BLE_NAME=Alice` gives **Alice**, and `BLE_NAME=Table-7` gives **Table-7**.
 
 Pick something you will recognize in the scan list on your laptop or phone.
-The name must fit into a single BLE advertisement packet, so keep it to 22 characters or fewer (to understand why this exact number, see [Advertisements](./README.md#advertisements)).
+The name must fit into a single BLE advertisement packet, which we already use to transmit other information like the service UUID, so keep it to 8 characters or fewer (to understand why this exact number, see [Advertisements](./README.md#advertisements)).
 
 Like the WiFi credentials from the previous exercise, export `BLE_NAME` before building or flashing:
 
@@ -48,9 +48,9 @@ This will open a new tab for the device showing it as a client that displays the
 
 </div>
 
-The client should advertise a service with UUID `0x180A`, which is the ID we set in the exercise.
+The client should advertise a service with UUID `0xf26a8079_996a_4418_8555_92b4b3b744ab`, which is the ID we set in the exercise.
 There might be some additional "generic" services listed, which you can safely ignore.
-Tapping on the service with this ID expands it to expose the characteristic for the LED with UUID `0x2A57`:
+Tapping on the service with this ID expands it to expose the characteristic for the LED with UUID `0x98666659_8007_46a1_a979_e4fe54a62a5f`:
 
 <div align="center">
 
@@ -62,11 +62,11 @@ Tapping on the service with this ID expands it to expose the characteristic for 
 
 You should see that the characteristic supports reading, writing, and notifying.
 This is indicated under "properties".
-You can read the value by tapping the single down arrow next to the "Digital Output" label.
+You can read the value by tapping the single down arrow next to the "Unknown Characteristic" label.
 When tapping the other "single down arrow" buttons, you should be able to see that the characteristic is for the LED color (measurement description) and that the valid value range starts at `0x00` (red) and ends at `0x02` (blue).
 Reading the characteristic should return the current LED color as one of those three byte values.
 
-Writing a single byte in that range should change the LED, which you should be able to test by tapping the single up arrow next to "Digital Output" and submitting the value through the pop-up dialog:
+Writing a single byte in that range should change the LED, which you should be able to test by tapping the single up arrow next to "Unknown Characteristic" and submitting the value through the pop-up dialog:
 
 <div align="center">
 
