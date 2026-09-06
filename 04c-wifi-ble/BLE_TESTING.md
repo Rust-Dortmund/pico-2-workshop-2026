@@ -1,20 +1,20 @@
 ## Testing over Bluetooth
 
-Once your program is running, the Pico 2 W will advertise itself over Bluetooth Low Energy (BLE) under the name you configured — for example **Alice** if you set `BLE_NAME=Alice`.
+Once your program is running, the Pico 2W will advertise itself over Bluetooth Low Energy (BLE) under the name you configured - for example **Alice** if you set `BLE_NAME=Alice`.
 You can connect to it from your laptop or phone and interact with the LED through GATT characteristics, in addition to the WiFi web server from the previous exercise.
 
 To do so, you will need a so-called _GATT client_ - a small application that can scan for BLE devices, connect to one, browse its services and characteristics, and read from or write to those characteristics.
 We recommend installing one before the workshop so you can focus on the exercise itself and will be using the [nRF Connect for Mobile](https://www.nordicsemi.com/Products/Development-tools/nrf-connect-for-mobile) app as our primary testing tool, which is available for free on both [Android](https://play.google.com/store/apps/details?id=no.nordicsemi.android.mcp) and [iOS](https://apps.apple.com/app/nrf-connect-for-mobile/id1054362403).
 If you can't use your phone for some reason, please refer to the [section on alternative clients](#alternative-clients).
 
-> ![NOTE]
+> [!NOTE]
 > This workshop is independently organized and is not affiliated with, sponsored by, or endorsed by Nordic Semiconductor.
 
 ### Setting Your Own Device Name
 
 Since everyone in the workshop will be running the same code, by default every Pico would advertise under the same device name, making it hard to tell your device apart from your neighbours'.
 To avoid that, before the program will compile you'll need to provide a short unique name through the `BLE_NAME` environment variable when compiling the program.
-This value is used directly as the advertised Bluetooth device name — for example, `BLE_NAME=Alice` gives **Alice**, and `BLE_NAME=Table-7` gives **Table-7**.
+This value is used directly as the advertised Bluetooth device name - for example, `BLE_NAME=Alice` gives **Alice**, and `BLE_NAME=Table-7` gives **Table-7**.
 
 Pick something you will recognize in the scan list on your laptop or phone.
 The name must fit into a single BLE advertisement packet, which we already use to transmit other information like the service UUID, so keep it to 8 characters or fewer (to understand why this exact number, see [Advertisements](./README.md#advertisements)).
@@ -92,7 +92,7 @@ On Windows, removing a stale pairing for the device and reconnecting often helps
 If a write appears to succeed but the LED does not change, double-check that you are writing exactly one byte with a value of `00`, `01`, or `02`.
 Other payloads are rejected by the firmware.
 
-If the advertised name is missing and you only see a device address, look for a peripheral that advertises service UUID `180A`, or power-cycle the Pico and scan again.
+If the advertised name is missing and you only see a device address, look for a peripheral that advertises service UUID `0xf26a8079_996a_4418_8555_92b4b3b744ab`, or power-cycle the Pico and scan again.
 
 ### Alternative Clients
 
@@ -115,7 +115,7 @@ Download the latest release for your operating system from the project's GitHub 
 
 No extra hardware is required, only a laptop with a working Bluetooth adapter.
 Before the exercise, open toolBLEx once and start a scan to confirm that your laptop can see nearby BLE devices.
-If the app reports a problem, fix your host Bluetooth setup first (see the troubleshooting section below).
+If the app reports a problem, fix your host Bluetooth setup first (see the troubleshooting section above).
 
 ##### Windows
 
