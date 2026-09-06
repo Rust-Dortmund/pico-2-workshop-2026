@@ -6,26 +6,26 @@ version = "0.1.0"
 [dependencies]
 embassy-executor = { version = "0.10.0", features = ["platform-cortex-m", "executor-thread", "executor-interrupt", "defmt"] }
 embassy-futures = "0.1.2"
-embassy-net = { version = "0.9", features = [ "tcp", "udp", "dhcpv4", "medium-ethernet"] }
+embassy-net = { version = "0.9.1", features = [ "tcp", "udp", "dhcpv4", "medium-ethernet"] }
 embassy-rp = { version = "0.10.0", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl", "rp235xa", "binary-info"] }
 embassy-sync = { version = "0.8", features = ["defmt"] }
 embassy-time = { version = "0.5.1", features = ["defmt", "defmt-timestamp-uptime"] }
 
-defmt = "1.0.1"
+defmt = "1.1.1"
 defmt-rtt = "1.0.0"
 
 cyw43 = { version = "0.7.0", features = ["defmt", "firmware-logs", "bluetooth"] }
 cyw43-pio = { version = "0.10.0", features = ["defmt"] }
 
-cortex-m = { version = "0.7.6", features = ["inline-asm"] }
-cortex-m-rt = "0.7.0"
-critical-section = "1.1"
+cortex-m = { version = "0.7.9", features = ["inline-asm"] }
+cortex-m-rt = "0.7.6"
+critical-section = "1.2.0"
 panic-probe = { version = "1.0.0", features = ["print-defmt"] }
 
 embedded-hal = "1"
 embedded-hal-async = "1"
 
-static_cell = "2"
+static_cell = "2.1.1"
 
 picoserve = { version = "0.18.0", features = ["embassy"] }
 
