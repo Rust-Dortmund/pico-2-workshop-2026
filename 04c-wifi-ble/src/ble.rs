@@ -214,7 +214,7 @@ pub(crate) fn initialize(
 
     // See https://embassy.dev/trouble/#_hostresources if you're curious about the numbers.
     let ble_host_resources = mk_static!(
-        HostResources<ExternalController<BtDriver<'static>, 10>, DefaultPacketPool, 4, 0, 1>,
+        HostResources<DefaultPacketPool, 4, 0, 1>,
         HostResources::new()
     );
 
