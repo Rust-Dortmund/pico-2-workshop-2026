@@ -27,7 +27,7 @@ embedded-hal-async = "1"
 
 static_cell = "2.1.1"
 
-picoserve = { version = "0.18.0", features = ["embassy"] }
+picoserve = { version = "0.20.0", features = ["embassy"] }
 
 trouble-host = { version = "0.7", features = ["peripheral", "gatt", "derive", "defmt"] }
 
