@@ -29,24 +29,27 @@ static_cell = "2.1.1"
 
 picoserve = { version = "0.20.0", features = ["embassy"] }
 
-trouble-host = { version = "0.7", features = ["peripheral", "gatt", "derive", "defmt"] }
+trouble-host = { version = "0.8", features = ["peripheral", "gatt", "derive", "defmt"] }
 
-# Published cyw43 0.7.0 uses bt-hci 0.8; trouble-host 0.7 needs bt-hci 0.9 (on Embassy main).
-# Patch the Embassy stack from one git rev so path deps unify (avoids embassy-time-driver conflicts).
-# Pin: https://github.com/embassy-rs/embassy/commit/c708723686ce80f83c80b059f04446c732db7272
+# Published cyw43 0.7.0 still talks bt-hci 0.8. trouble-host 0.8 needs bt-hci 0.10
+# (which depends on bt-hci-transport 0.1). Patch the Embassy stack from one git rev
+# so path deps unify and cyw43 implements that transport.
+# Not current main: later embassy-net dropped `proto-ipv4` (renamed `ipv4`), which
+# picoserve 0.20 still requires. This pin is the newest with both bt-hci-transport
+# and proto-ipv4: https://github.com/embassy-rs/embassy/commit/2d36ff0f8d7fbc3095412204f8f01dd2bcab6344
 [patch.crates-io]
-cyw43 = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
-cyw43-pio = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
-embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
-embassy-futures = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
-embassy-net = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
-embassy-net-driver = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
-embassy-net-driver-channel = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
-embassy-rp = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
-embassy-sync = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
-embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
-embassy-time-driver = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
-embassy-embedded-hal = { git = "https://github.com/embassy-rs/embassy.git", rev = "c708723686ce80f83c80b059f04446c732db7272" }
+cyw43 = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
+cyw43-pio = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
+embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
+embassy-futures = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
+embassy-net = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
+embassy-net-driver = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
+embassy-net-driver-channel = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
+embassy-rp = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
+embassy-sync = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
+embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
+embassy-time-driver = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
+embassy-embedded-hal = { git = "https://github.com/embassy-rs/embassy.git", rev = "2d36ff0f8d7fbc3095412204f8f01dd2bcab6344" }
 
 [profile.release]
 codegen-units = 1
