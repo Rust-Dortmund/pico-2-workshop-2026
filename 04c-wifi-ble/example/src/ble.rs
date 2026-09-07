@@ -32,10 +32,13 @@ struct Server {
     led_service: LedService,
 }
 
+const LED_SERVICE_ID: u128 = 0xf26a8079_996a_4418_8555_92b4b3b744ab;
+const LED_COLOR_UUID: u128 = 0x98666659_8007_46a1_a979_e4fe54a62a5f;
+
 /// GATT service providing capabilities to read and set the LED color.
 ///
 /// As there is no standard UUID for "tri-color RGB LEDs" defined, we use one without a standard meaning.
-#[gatt_service(uuid = BluetoothUuid16::new(0x180a))]
+#[gatt_service(uuid = BluetoothUuid128::new(LED_SERVICE_ID))]
 struct LedService {
     /// Characteristic of the GATT service setting the actual color.
     ///
@@ -44,7 +47,7 @@ struct LedService {
     /// Again, there is no standard cahracteristic defined, so we use one without a standard meaning.
     #[descriptor(uuid = descriptors::VALID_RANGE, read, value = [0, 2])]
     #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "color", read, value = "LED Color", type = &'static str)]
-    #[characteristic(uuid = BluetoothUuid16::new(0x2a57), read, write, notify, value = 0)]
+    #[characteristic(uuid = BluetoothUuid128::new(LED_COLOR_UUID), read, write, notify, value = 0)]
     color: u8,
 }
 
@@ -70,7 +73,7 @@ impl BleConnectionRunner {
         let len = AdStructure::encode_slice(
             &[
                 AdStructure::Flags(LE_GENERAL_DISCOVERABLE | BR_EDR_NOT_SUPPORTED),
-                AdStructure::CompleteServiceUuids16(&[[0x0a, 0x18]]),
+                AdStructure::CompleteServiceUuids128(&[LED_SERVICE_ID.to_le_bytes()]),
                 AdStructure::CompleteLocalName(name.as_bytes()),
             ],
             &mut advertiser_data[..],
@@ -112,21 +115,6 @@ impl BleConnectionRunner {
         };
     }
 
-    /// Accepts a [`WriteEvent`] to a characteristic in a GATT service.
-    ///
-    /// # Cancellation safety
-    ///
-    /// This function is cancel safe.
-    async fn accept_write_event<P: PacketPool>(event: WriteEvent<'_, '_, P>) {
-        match event.accept() {
-            // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
-            Ok(reply) => reply.send().await,
-            Err(e) => {
-                info!("[gatt] error sending response: {:?}", e)
-            }
-        }
-    }
-
     /// Handles write access to a characteristic in a GATT service.
     ///
     /// # Cancellation safety
@@ -137,37 +125,41 @@ impl BleConnectionRunner {
         server: &Server<'_>,
         sender: &ColorSender<2>,
     ) {
-        if event.handle() == server.led_service.color.handle {
-            let accepted = event.with_data(|_offset, data| {
-                info!("[gatt] Write Event to Level Characteristic: {:?}", data);
+        if event.handle() != server.led_service.color.handle {
+            return;
+        }
+        let requested_color = event.with_data(|_offset, data| {
+            info!("[gatt] Write Event to Level Characteristic: {:?}", data);
 
-                match data {
-                    [COLOR_RED] => {
-                        sender.send(Color::Red);
-                        true
-                    }
-                    [COLOR_GREEN] => {
-                        sender.send(Color::Green);
-                        true
-                    }
-                    [COLOR_BLUE] => {
-                        sender.send(Color::Blue);
-                        true
-                    }
-                    _ => false,
+            match data {
+                [COLOR_RED] => {
+                    Some(Color::Red)
                 }
-            });
-
-            if accepted {
-                // CANCELLATION SAFETY: Documented as being cancel safe.
-                Self::accept_write_event(event).await;
-            } else {
-                match event.reject(AttErrorCode::OUT_OF_RANGE) {
+                [COLOR_GREEN] => {
+                    Some(Color::Green)
+                }
+                [COLOR_BLUE] => {
+                    Some(Color::Blue)
+                }
+                _ => None,
+            }
+        });
+        match requested_color {
+            Some(color) => {
+                sender.send(color);
+                match event.accept(){
                     // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
                     Ok(reply) => reply.send().await,
                     Err(e) => {
                         info!("[gatt] error sending response: {:?}", e)
                     }
+                }
+            }
+            None => match event.reject(AttErrorCode::OUT_OF_RANGE) {
+                // CANCELLATION SAFETY: Used this way in https://github.com/embassy-rs/trouble/blob/main/examples/apps/src/ble_bas_peripheral.rs
+                Ok(reply) => reply.send().await,
+                Err(e) => {
+                    info!("[gatt] error sending response: {:?}", e)
                 }
             }
         }
