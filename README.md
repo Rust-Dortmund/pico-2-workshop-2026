@@ -68,3 +68,6 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 The presentation framework RevealJS used to create the introductory slides is licensed under an MIT license (see [LICENSE-RevealJS](000-intro/LICENSE-RevealJS)).
 
 The logo from awesome embedded Rust is licensed under the [CC0 1.0 Universal License](https://creativecommons.org/publicdomain/zero/1.0/legalcode).
+
+The wiring diagrams and associated `.fzz` files were created with [Fritzing](https://fritzing.org/) including their [parts library](https://github.com/fritzing/fritzing-parts/), which is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported license ([CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/), see [LICENSE-FRITZING](./LICENSE-FRITZING)), and are made available under the Creative Commons Attribution-ShareAlike 4.0 International license ([CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)) (see [Compatible Licenses](https://creativecommons.org/compatible-licenses/)).
+Some of the parts used are from the SparkFun Fritzing parts library, which is licensed under an MIT license ([LICENSE-SPARKPLUG](./LICENSE-SPARKPLUG)).

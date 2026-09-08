@@ -56,7 +56,9 @@ The following image shows how to wire up the LED and resistors.
 
 <div align="center">
 
-<img alt="Wiring Diagram" src="LED_only.png" width="50%" />
+<img alt="Wiring Diagram" src="LED_only.png" width="20%" />
+
+<em>This diagram was created with Fritzing.</em>
 
 </div>
 

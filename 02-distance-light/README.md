@@ -70,7 +70,9 @@ The full wiring should look like the image below:
 
 <div align="center">
 
-<img alt="Wiring Diagram" src="Wire_APDS.png" width="50%" />
+<img alt="Wiring Diagram" src="Wire_APDS.png" width="30%" />
+
+<em>This diagram was created with Fritzing.<br/>The APDS-9960 part is individually MIT licensed as per [LICENSE-SPARKPLUG](../LICENSE-SPARKPLUG).</em>
 
 </div>
 
