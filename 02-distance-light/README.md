@@ -76,11 +76,6 @@ The full wiring should look like the image below:
 
 </div>
 
-> [!NOTE]
-> We couldn't find a schematic with the exact visuals as our breakout board, so the diagram above shows a slightly different board for the APDS-9960.
-> `SDA`, `SCL` and `GND` are the same on our sensors.
-> The fourth pin, labelled `3Vo` in the diagram, is labelled `VCC` for us - it's the only one connected to the top-right of the Pico 2 and the only remaining free pin that is part of the same group / side as the other 3 on our APDS board.
-
 ## Coding
 
 For this exercise, you'll have to do 4 things:
