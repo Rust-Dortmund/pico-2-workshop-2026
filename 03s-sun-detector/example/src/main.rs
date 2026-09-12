@@ -1,0 +1,99 @@
+#![no_std]
+#![no_main]
+
+use core::cmp::min;
+
+use defmt::*;
+use embassy_executor::Spawner;
+use embassy_rp::{
+    Peripherals,
+    i2c::InterruptHandler,
+    peripherals::I2C1,
+    pwm::{Pwm, SetDutyCycle},
+};
+use embassy_time::{Duration, Ticker};
+use {defmt_rtt as _, panic_probe as _};
+
+// The `apds9960` library can work with any type that implements the `I2C` trait from `embedded_hal_async`.
+// To save us some typing, create a type alias that has the RP Pico types already filled in.
+type Apds9960 = apds9960::Apds9960<
+    embassy_rp::i2c::I2c<'static, I2C1, embassy_rp::i2c::Async>,
+    apds9960::Async,
+>;
+
+// Bind the interrupt for the I2C bus so we can get notified if there is new data.
+embassy_rp::bind_interrupts!(struct Irqs {
+    I2C1_IRQ => InterruptHandler<embassy_rp::peripherals::I2C1>;
+});
+
+// The maximum brightness that is typically reported by the APDS-9960.
+const APDS_9960_MAX_BRIGHTNESS: u16 = 1024;
+
+// Our main function - place your code in HERE:
+#[embassy_executor::main]
+async fn main(_spawner: Spawner) {
+    // Get access to the pin(s), PWM slices and I2C bus peripheral.
+    let Peripherals {
+        PIN_14,
+        PIN_15,
+        PIN_18,
+        PIN_19,
+        PIN_20,
+        I2C1,
+        PWM_SLICE1,
+        PWM_SLICE2,
+        ..
+    } = embassy_rp::init(Default::default());
+
+    // Instead of Output, as in the previous exercise, use Pwm so we can drive the LED with variable brightness.
+    let pwm_red_green = Pwm::new_output_ab(PWM_SLICE1, PIN_18, PIN_19, Default::default());
+    let (pwm_red, pwm_green) = pwm_red_green.split();
+    let mut pwm_red = pwm_red.unwrap();
+    let mut pwm_green = pwm_green.unwrap();
+
+    let pwm_blue = Pwm::new_output_a(PWM_SLICE2, PIN_20, Default::default());
+    let (pwm_blue, _) = pwm_blue.split();
+    let mut pwm_blue = pwm_blue.unwrap();
+
+    // Instantiate the I2C bus with the correct pins.
+    let sda = PIN_14;
+    let scl = PIN_15;
+    let config = embassy_rp::i2c::Config::default();
+    let bus = embassy_rp::i2c::I2c::new_async(I2C1, scl, sda, Irqs, config);
+
+    // Create and initialize the driver for the APDS9960 sensor.
+    let mut sensor = Apds9960::new(bus);
+
+    // Enable the neccessary sensor components.
+    sensor.enable().await.unwrap();
+    sensor.enable_light().await.unwrap();
+
+    // Make the loop check the sensor's light value and have the LED react to it.
+    let mut ticker = Ticker::every(Duration::from_millis(50));
+    loop {
+        // Obtain a brightness reading from the sensor.
+        let brightness = sensor.read_light_clear().await.unwrap();
+        info!("Brightness: {}", brightness);
+
+        // Compute the duty cycle from the brightness.
+        let brightness = min(brightness, APDS_9960_MAX_BRIGHTNESS);
+        let duty_cycle_percent: f32 =
+            (APDS_9960_MAX_BRIGHTNESS - brightness) as f32 / APDS_9960_MAX_BRIGHTNESS as f32;
+
+        // LEDs have non-linear brightness curves. Linearize the brightness curve by using a parabola function as an approximation.
+        let effective_duty_cycle_percent: u8 =
+            ((duty_cycle_percent * duty_cycle_percent) * 100f32) as u8;
+
+        pwm_red
+            .set_duty_cycle_percent(effective_duty_cycle_percent)
+            .unwrap();
+        pwm_green
+            .set_duty_cycle_percent(effective_duty_cycle_percent)
+            .unwrap();
+        pwm_blue
+            .set_duty_cycle_percent(effective_duty_cycle_percent)
+            .unwrap();
+
+        ticker.next().await;
+    }
+}

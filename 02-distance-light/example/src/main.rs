@@ -4,14 +4,20 @@
 use defmt::*;
 use embassy_executor::Spawner;
 use embassy_rp::{
-    Peripherals, gpio::{Level, Output}, i2c::InterruptHandler, peripherals::I2C1
+    Peripherals,
+    gpio::{Level, Output},
+    i2c::InterruptHandler,
+    peripherals::I2C1,
 };
 use embassy_time::{Duration, Ticker};
 use {defmt_rtt as _, panic_probe as _};
 
 // The `apds9960` library can work with any type that implements the `I2C` trait from `embedded_hal_async`.
 // To save us some typing, create a type alias that has the RP Pico types already filled in.
-type Apds9960 = apds9960::Apds9960<embassy_rp::i2c::I2c<'static, I2C1, embassy_rp::i2c::Async>, apds9960::Async>;
+type Apds9960 = apds9960::Apds9960<
+    embassy_rp::i2c::I2c<'static, I2C1, embassy_rp::i2c::Async>,
+    apds9960::Async,
+>;
 
 // Bind the interrupt for the I2C bus so we can get notified if there is new data.
 embassy_rp::bind_interrupts!(struct Irqs {
@@ -36,7 +42,7 @@ async fn main(_spawner: Spawner) {
     // We don't need the blue pin for the traffic light, so just make sure to turn it off initially.
     let mut output_red = Output::new(PIN_18, Level::Low);
     let mut output_green = Output::new(PIN_19, Level::Low);
-    let _output_blue = Output::new(PIN_20, Level::Low); 
+    let _output_blue = Output::new(PIN_20, Level::Low);
 
     // Instantiate the I2C bus with the correct pins.
     let sda = PIN_14;

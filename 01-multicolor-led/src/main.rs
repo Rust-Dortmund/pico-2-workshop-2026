@@ -16,12 +16,9 @@ use {defmt_rtt as _, panic_probe as _};
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
     // Get access to the pin(s) we need.
-    // TODO: Change this so you can access the pins for the R, G and B channel 
+    // TODO: Change this so you can access the pins for the R, G and B channel
     // of the multicolor LED.
-    let Peripherals {
-        PIN_25,
-        ..
-    } = embassy_rp::init(Default::default());
+    let Peripherals { PIN_25, .. } = embassy_rp::init(Default::default());
 
     // Set all pins to low initially.
     let mut led = Output::new(PIN_25, Level::Low);
@@ -35,4 +32,3 @@ async fn main(_spawner: Spawner) {
         ticker.next().await;
     }
 }
-

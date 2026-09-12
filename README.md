@@ -24,6 +24,11 @@ Note that the example solutions are separate crates and can't be run as a `cargo
 - Clone this repo 
 - Follow as much of the setup instructions under [`00-setup`](00-setup/README.md) as you want that don't yet require course hardware to prepare.
 
+## Troubleshooting
+
+We've put together some of the more common places where people got stuck and what to do if that happens to you at [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+Hopefully, you won't need to, but if you ever feel like something is just not working or if you're facing a problem and all instructors are currently busy, you might want to go and have a look if you can find a solution for your problem in there.
+
 ## Embassy
 
 You will be using the [embassy](https://embassy.dev/) framework to write your programs during this workshop.
@@ -53,6 +58,16 @@ By <a href="https://commons.wikimedia.org/w/index.php?title=User:Guhuru" class="
 
 ## License and Attributions
 
-The presentation framework RevealJS used to create the introduction slides is licensed under an MIT license (see [LICENSE-RevealJS](000-intro/LICENSE-RevealJS)).
+Copyright for the materials in this repository is held by Björn Barwinski and Domenic Quirl, 2025. 
+Exercise and example code is provided under either of the [MIT license](./LICENSE-MIT) OR the [Apache License, Version 2.0](./LICENSE-APACHE) at your option.
+The workshop instructions, presentation slides, README text and all of the graphics created for the presentations are licensed under the Creative Commons Attribution-NonCommercial 4.0 International license ([CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)) unless otherwise noted. 
+See [LICENSE-CC-BY-NC](./LICENSE-CC-BY-NC) for the full license.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this codebase by you, as defined in the Apache-2.0 license, shall be licensed as above, without any additional terms or conditions.
+
+The presentation framework RevealJS used to create the introductory slides is licensed under an MIT license (see [LICENSE-RevealJS](000-intro/LICENSE-RevealJS)).
 
 The logo from awesome embedded Rust is licensed under the [CC0 1.0 Universal License](https://creativecommons.org/publicdomain/zero/1.0/legalcode).
+
+The wiring diagrams and associated `.fzz` files were created with [Fritzing](https://fritzing.org/) including their [parts library](https://github.com/fritzing/fritzing-parts/), which is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported license ([CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/), see [LICENSE-FRITZING](./LICENSE-FRITZING)), and are made available under the Creative Commons Attribution-ShareAlike 4.0 International license ([CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)) (see [Compatible Licenses](https://creativecommons.org/compatible-licenses/)).
+Some of the parts used are from the SparkFun Fritzing parts library, which is licensed under an MIT license ([LICENSE-SPARKPLUG](./LICENSE-SPARKPLUG)).
