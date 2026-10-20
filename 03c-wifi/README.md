@@ -1,6 +1,6 @@
-# Overloading the Workshop WiFi
+# A Pico-Sized HTTP Server
 
-Now for something slightly different: as our final exercise (for now), we'll make use of the on-board WiFi chip to turn your Pico 2 into a minimal webserver.
+Now for something slightly different: as our next exercise, we'll make use of the on-board WiFi chip to turn your Pico 2 into a minimal webserver.
 At the end of the exercise, you will be able to send a POST request from your laptop to the Pico 2 to change the color of the LED and receive a JSON response as a confirmation.
 
 ## Nightly Rust
