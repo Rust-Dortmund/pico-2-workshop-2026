@@ -179,7 +179,7 @@ When we added the HTTP API for setting color values, we introduced some synchron
 Since we only needed them to send requests from the web server to the LED runner, they can currently only facilitate a single connection.
 
 If we're now keeping the HTTP API and adding Bluetooth on top of it, that is no longer enough.
-To enable sending data to the LED runner from an incoming Bluetooth connection, generalize the types in `led_receiver` to more than 1 participant. 
+To enable sending data to the LED runner from an incoming Bluetooth connection, generalize the types in `led_controller` to more than 1 participant. 
 Keep in mind that we're adding both a new sender (incoming Bluetooth writes) _and_ a new receiver for Bluetooth subscriptions / notifications.
 Therefore, with keeping WiFi, there are now 2 senders and 2 receivers in total.
 
