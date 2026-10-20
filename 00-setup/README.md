@@ -45,7 +45,8 @@ Linux users will additionally need to follow the [probe setup instructions](http
 
 ```sh
 cp 69-probe-rs.rules /etc/udev/rules.d/
-udevadm control --reload
+udevadm control --reload # ensure the new rules are used
+udevadm trigger # apply rules to already added devices
 ```
 
 If you want your terminal to autocomplete `probe-rs` commands, you can run
