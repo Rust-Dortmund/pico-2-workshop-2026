@@ -24,6 +24,28 @@ Note that the example solutions are separate crates and can't be run as a `cargo
 - Clone this repo 
 - Follow as much of the setup instructions under [`00-setup`](00-setup/README.md) as you want that don't yet require course hardware to prepare.
 
+<details>
+
+<summary>If you're going through the material yourself without a workshop or want to run the workshop with your own group</summary>
+
+### Procuring the Hardware
+
+You'll need to get the hardware yourself if it's not provided to you, so here's all we have on the parts we've been using:
+
+| Part | # per Participant | Notes | How / where to buy |
+| ---- | ----------------- | ----- | ------------------ |
+| Raspberry Pi Pico 2W | 1 | Ideally, get pre-soldered ones ("with hats" / "with headers") | We used Mouser (358-SC1634), but they recently introduced a 10-device per customer limit. Product number RPI-PICO2-WH on berrybase. |
+| Raspberry Pi Debug Probe | 1 | Comes with a USB-A data cable. Make sure to flash firmware version 2 for the debug probe if it still comes with version 1. See Raspberry's [firmware update instructions](https://www.raspberrypi.com/documentation/microcontrollers/debug-probe.html#updating-the-firmware-on-the-debug-probe). | We used Mouser (358-SC0889), berrybase is RPIP-DEBUGP. |
+| APDS-9960 light and gesture sensor | 1 | We haven't found a pre-soldered version of the sensor so far, so you'll probably have to solder it yourself. The cheaper breakout boards are fine, but usually have some dropout rate, so order a couple more spares than you think you'll need. | Availability for this component varies a lot, since it's often based on when a run of the chips is produced and they have spare capacity. We've had the best luck checking Amazon for sets of 2 sensors and then ordering multiple of those. Mouser also lists it (392-333002), but only has very limited quantities. |
+| Breadboard | 1 | If you want to have room, use a board with at least 45 or 60 rows. 30 can work, but is very crowded. | Amazon often has packs of 4-6 boards of which you can get multiple, e.g. we've previously used [these ones from AZDelivery](https://www.amazon.de/dp/B07VCG6Q68/?coliid=IC3QC3Z0EPBXG&colid=2W7OEX9GHTRHF&psc=1). Berrybase also has individual ones if you're looking just for yourself. |
+| 50O Resistors	| 3 | Through-hole resistors that can be manually placed on the breadboard. | Any resistor with 50 Ohms is fine, we've mostly used Mouser again here (e.g., 603-MFR-25FTE52-50R). |
+| RGB LEDs | 1 | 3-color LED. Must be common cathode (shared ground, distinct high voltage input per color - refer to the wiring instructions for a diagram). Otherwise, the ordering of the colors can be adjusted through the wiring or in the code. Try to find an LED with a forward voltage of at most 3.3V, which is the Pico's bus voltage. 5V LEDs won't work as well and be very dimmed with the Pico 2! For reference, the linked LEDs have a forward voltage of 2V-2.2V for the red channel and 3V-3.2V for the other channels (3.4V is also fine, you'll not quite be getting max brightness but the LED should work). If you do get other LEDs, note that you might need to adjust the resistors' resistance accordingly. | You can find packs of 100 LEDs on Amazon for good prices, e.g. we've previously used [these ones](https://www.amazon.de/dp/B0DS57SFD7/?coliid=I3324A8JZOMX1D&colid=2W7OEX9GHTRHF) (you can get either the clear or the frosted ones). |
+| Micro-USB Cable | 1 | USB-A to Micro-USB, for powering the Pico 2 | Wherever |
+| Jumper-Wires | 10 | If you get a big enough breadboard, you'll pretty much only need male to male wires. For a 30-row breadboard, it might make sense to get a couple of male to female ones to connect the sensor without placing it on the board. Around 15-20cm is a good length, 10cm can work but becomes tight, 30cm is excessive. Male to female wires can help act as extenders if needed (will increase wobbling / may worsen contact). | Pretty much wherever, there are many packs of these. On Amazon, we've previously used [this set](https://www.amazon.de/dp/B0D91D47RD/?coliid=I2WQZACAMPGKMX&colid=2W7OEX9GHTRHF&psc=1). Berrybase has them as DUPK-40-MM-20. |
+| Anti-Static ESD bags | 1 | Optional, for packaging sets for individual participants. | Wherever, but try to find a bulk offer as prices drop drastically with number of bags ordered. We've previously used [these](https://www.amazon.de/dp/B0BS8K9TZ2?ref=ppx_yo2ov_dt_b_fed_asin_title&th=1) on Amazon (size 18 x 26, so the breadboard fits). |
+
+</details>
+
 ## Troubleshooting
 
 We've put together some of the more common places where people got stuck and what to do if that happens to you at [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
